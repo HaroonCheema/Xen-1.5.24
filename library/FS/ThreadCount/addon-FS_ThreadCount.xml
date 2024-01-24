@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addon addon_id="FS_ThreadCount" title="FS-ThreadCount" version_string="2.0.0" version_id="2" url="" install_callback_class="FS_ThreadCount_Install" install_callback_method="install" uninstall_callback_class="FS_ThreadCount_Install" uninstall_callback_method="uninstallCode">
+  <admin_navigation/>
+  <admin_permissions/>
+  <admin_style_properties/>
+  <admin_templates/>
+  <admin_template_modifications>
+    <modification template="user_edit" modification_key="add_thread_count_field" description="Add thread count Field" execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[<xen:spinboxunit label="{xen:phrase trophy_points}:" name="trophy_points" value="{$user.trophy_points}" min="0" />]]></find>
+      <replace><![CDATA[$0
+<xen:spinboxunit label="{xen:phrase fs_threads}:" name="thread_count" value="{$user.thread_count}" min="0" />]]></replace>
+    </modification>
+  </admin_template_modifications>
+  <code_events/>
+  <code_event_listeners>
+    <listener event_id="load_class_controller" execute_order="10" callback_class="FS_ThreadCount_Listener" callback_method="listenController" active="1" hint="" description="ThreadCount_ControllerPublic::listenController"/>
+    <listener event_id="load_class_model" execute_order="10" callback_class="FS_ThreadCount_Listener" callback_method="extendModelUser" active="1" hint="" description=""/>
+  </code_event_listeners>
+  <cron/>
+  <email_templates/>
+  <email_template_modifications/>
+  <optiongroups/>
+  <permissions>
+    <permission_groups/>
+    <permissions/>
+    <interface_groups/>
+  </permissions>
+  <phrases>
+    <phrase title="fs_threads" version_id="1" version_string="1.0.0"><![CDATA[Threads]]></phrase>
+    <phrase title="most_threads" version_id="1" version_string="1.0.0"><![CDATA[Most Threads]]></phrase>
+    <phrase title="Xb_thread_Count" version_id="1" version_string="1.0.0"><![CDATA[Threads]]></phrase>
+  </phrases>
+  <route_prefixes/>
+  <style_properties/>
+  <templates/>
+  <public_template_modifications>
+    <modification template="member_notable" modification_key="add_most_threads_tab" description="Add a new tab Most Threads" execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[<li class="{xen:if '{$type} == "messages"', active}"><a href="{xen:link members}">{xen:phrase most_messages}</a></li>]]></find>
+      <replace><![CDATA[<li class="{xen:if '{$type} == "threads"', active}"><a href="{xen:link members, '', 'type=threads' }">{xen:phrase most_threads}</a></li>
+<li class="{xen:if '{$type} == "messages"', active}"><a href="{xen:link members, '', 'type=members' }">{xen:phrase most_messages}</a></li>]]></replace>
+    </modification>
+    <modification template="member_list_item" modification_key="add_thread_count" description="Add Thread count under user name" execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[<dt title="{xen:phrase total_messages_posted_by_x, 'name={$user.username}'}">{xen:phrase messages}:</dt> <dd>{xen:number $user.message_count}</dd>]]></find>
+      <replace><![CDATA[$0
+<dt title="{xen:phrase total_messages_posted_by_x, 'name={$user.username}'}">{xen:phrase fs_threads}:</dt> <dd>{xen:number $user.thread_count}</dd>]]></replace>
+    </modification>
+    <modification template="message_user_info" modification_key="xb_thread_count" description="Thread Count Dispaly" execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[<xen:if is="{xen:property messageShowMessageCount} AND {$user.user_id}">]]></find>
+      <replace><![CDATA[<xen:if is="{$user.thread_count}>=0 AND {$user.user_id}">
+					<dl class="pairsJustified">
+						<dt>{xen:phrase Xb_thread_Count}:</dt>
+						<dd>{$user.thread_count}</dd>
+					</dl>
+				</xen:if>
+$0]]></replace>
+    </modification>
+  </public_template_modifications>
+  <bb_code_media_sites/>
+  <bb_codes/>
+</addon>
