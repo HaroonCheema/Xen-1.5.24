@@ -987,7 +987,7 @@ class XenForo_ControllerPublic_Account extends XenForo_ControllerPublic_Abstract
 			/** @var XenForo_Model_UserChangeLog $changeLogModel */
 			$changeLogModel = $this->getModelFromCache('XenForo_Model_UserChangeLog');
 			$emailChanges = $changeLogModel->countChangeLogsSince(
-				$visitor['user_id'], 'email', XenForo_Application::$time 
+				$visitor['user_id'], 'email', XenForo_Application::$time - 3600
 			);
 			if ($emailChanges >= 3)
 			{
