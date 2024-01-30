@@ -2,54 +2,47 @@
 
 class FS_DeleteEmail_ControllerPublic_Account extends XFCP_FS_DeleteEmail_ControllerPublic_Account
 {
-
-    /**
-     * Database object
-     *
-     * @var Zend_Db_Adapter_Abstract
-     */
-    protected $_db = null;
-
-    // public function actionContactDetails()
-    // {
-    //     $visitor = XenForo_Visitor::getInstance();
-
-    //     $auth = $this->_getUserModel()->getUserAuthenticationObjectByUserId($visitor['user_id']);
-    //     if (!$auth) {
-    //         return $this->responseNoPermission();
-    //     }
-
-    //     // echo "<pre>";
-    //     // var_dump($visitor['deleted_by']);
-    //     // exit;
-    //     // // echo "hello world";
-    //     // // exit;
-
-    //     $response = parent::actionContactDetails();
-
-    //     return $response;
-    // }
-
-    public function actionDeleteEmail()
+    public function actionContactDetailsSave()
     {
+        $this->_assertPostOnly();
 
-        // if ($this->isUpdate() && $this->isChanged('navigation_id'))
-        // {
+        $settings = $this->_input->filter(array(
+            'email' => XenForo_Input::STRING,
+        ));
 
         $visitor = XenForo_Visitor::getInstance();
 
-        // echo "<pre>";
-        // var_dump($visitor);
-        // exit;
+        $auth = $this->_getUserModel()->getUserAuthenticationObjectByUserId($visitor['user_id']);
+        if (!$auth) {
+            return $this->responseNoPermission();
+        }
+
+        if ($settings['email'] != $visitor['email'] && $visitor['deleted_by'] == 1) {
+
+            return $this->responseError(new XenForo_Phrase('your_email_may_not_be_changed_at_this_time'));
+        }
+
+        return parent::actionContactDetailsSave();
+    }
+
+    public function actionDeleteEmail()
+    {
+        $visitor = XenForo_Visitor::getInstance();
+
+        if (!$visitor['email']) {
+            return $this->responseNoPermission();
+        }
 
         if ($this->isConfirmedPost()) {
             $userId = $visitor['user_id'];
-            $email = '';
 
             $db = XenForo_Application::getDb();
 
             $sql = 'UPDATE xf_user SET email = ? WHERE user_id = ?';
-            $db->query($sql, [$email, $userId]);
+            $db->query($sql, ['', $userId]);
+
+            $sql1 = 'UPDATE xf_user SET deleted_by = ? WHERE user_id = ?';
+            $db->query($sql1, [0, $userId]);
 
             return $this->responseRedirect(
                 XenForo_ControllerResponse_Redirect::SUCCESS,
@@ -68,43 +61,4 @@ class FS_DeleteEmail_ControllerPublic_Account extends XFCP_FS_DeleteEmail_Contro
             $viewParams
         );
     }
-
-    // public function actionDeleteEmail()
-    // {
-    // 	$visitor = \XF::visitor();
-    // 	$auth = $visitor->Auth->getAuthenticationHandler();
-    // 	if (!$auth) {
-    // 		return $this->noPermission();
-    // 	}
-
-    // 	if ($this->isPost()) {
-    // 		$visitor->fastUpdate('email', '');
-
-    // 		return $this->redirect($this->buildLink('account/account-details'));
-    // 	}
-
-    // 	$viewpParams = [
-    // 		'confirmUrl' => $this->buildLink('account/delete-email', $visitor),
-    // 		'contentTitle' => $visitor->email,
-    // 	];
-
-    // 	return $this->view('XF\Account', 'fs_email_delete_confirm', $viewpParams);
-    // }
-
-    // public function actionEmail()
-    // {
-    //     $visitor = XenForo_Visitor::getInstance();
-
-    // 	$auth = $visitor->Auth->getAuthenticationHandler();
-    // 	if (!$auth) {
-    // 		return $this->noPermission();
-    // 	}
-
-    // 	if ($visitor['deleted_by'] == 1) {
-    // 		throw $this->exception(
-    // 			$this->error(\XF::phrase('your_email_may_not_be_changed_at_this_time'))
-    // 		);
-    // 	}
-    // 	return parent::actionEmail();
-    // }
 }

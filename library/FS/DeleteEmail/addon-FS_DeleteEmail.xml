@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addon addon_id="FS_DeleteEmail" title="[FS] DeleteEmail" version_string="1000010" version_id="2" url="" install_callback_class="FS_DeleteEmail_Install" install_callback_method="install" uninstall_callback_class="FS_DeleteEmail_Install" uninstall_callback_method="uninstallCode">
+  <admin_navigation/>
+  <admin_permissions/>
+  <admin_style_properties/>
+  <admin_templates/>
+  <admin_template_modifications/>
+  <code_events/>
+  <code_event_listeners>
+    <listener event_id="load_class_controller" execute_order="10" callback_class="FS_DeleteEmail_Listener" callback_method="listenController" active="1" hint="" description="FS_DeleteEmail_ControllerPublic::listenController"/>
+    <listener event_id="load_class_controller" execute_order="10" callback_class="FS_DeleteEmail_Listener" callback_method="extendModelUser" active="1" hint="" description="FS_DeleteEmail_ModelUser::extendModelUser"/>
+  </code_event_listeners>
+  <cron/>
+  <email_templates/>
+  <email_template_modifications/>
+  <optiongroups/>
+  <permissions>
+    <permission_groups/>
+    <permissions/>
+    <interface_groups/>
+  </permissions>
+  <phrases>
+    <phrase title="fs_confirm_action" version_id="2" version_string="1000010"><![CDATA[Confirm action]]></phrase>
+    <phrase title="fs_delete_email_delete_btn" version_id="2" version_string="1000010"><![CDATA[Delete Email]]></phrase>
+    <phrase title="please_confirm_that_you_want_to_delete_following" version_id="2" version_string="1000010"><![CDATA[Please confirm that you want to delete the following :]]></phrase>
+  </phrases>
+  <route_prefixes/>
+  <style_properties/>
+  <templates>
+    <template title="fs_delete_email_delete" version_id="2" version_string="1000010"><![CDATA[<xen:title>{xen:phrase fs_confirm_action}</xen:title>
+
+
+<form action="{xen:link 'account/delete-email'}" method="post" class="xenForm formOverlay" id="delete-post">
+
+<p>{xen:phrase please_confirm_that_you_want_to_delete_following}</p>
+
+<br/>
+<strong><center>{$email}</center></strong>
+<br/>
+
+
+<dl class="ctrlUnit submitUnit">
+<dt></dt>
+<dd>
+	<input type="submit" value="{xen:phrase delete}" class="button primary" />
+</dd>
+</dl>
+
+<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
+<input type="hidden" name="_xfConfirm" value="1" />
+</form>]]></template>
+  </templates>
+  <public_template_modifications>
+    <modification template="account_contact_details" modification_key="fs_delete_email_account_contact_details" description="fs_delete_email_account_contact_detais_btn_delete" execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[<dl class="ctrlUnit">
+				<dt><label for="ctrl_email">{xen:phrase email}:</label></dt>
+				<dd>
+					<input type="email" name="email" value="{$visitor.email}" dir="ltr" class="textCtrl ConfirmValue" id="ctrl_email" autofocus="autofocus" />
+					<p class="explain">{xen:phrase if_you_change_your_email_you_may_need_to_reconfirm_your_account}</p>
+				</dd>
+			</dl>]]></find>
+      <replace><![CDATA[<dl class="ctrlUnit">
+<xen:if is="{$visitor.email} AND {$visitor.user_state} == 'valid'">
+				<dt><label for="ctrl_email">{xen:phrase email}:</label></dt>
+				<dd>
+					<input type="email" name="email" value="{$visitor.email}" dir="ltr" class="textCtrl ConfirmValue" id="ctrl_email" autofocus="autofocus" />
+					<p class="explain">{xen:phrase if_you_change_your_email_you_may_need_to_reconfirm_your_account}</p>
+				</dd>
+
+
+                                <dt></dt>
+				<dd><a href="{xen:link 'account/delete-email'}" class="callToAction OverlayTrigger"><span>{xen:phrase fs_delete_email_delete_btn}</span></a></dd>
+<xen:else />
+                                <dt><label for="ctrl_email">{xen:phrase email}:</label></dt>
+				<dd>
+					<input type="email" name="email" value="none" dir="ltr" class="textCtrl ConfirmValue" id="ctrl_email" autofocus="autofocus" />
+					<p class="explain">{xen:phrase if_you_change_your_email_you_may_need_to_reconfirm_your_account}</p>
+				</dd>
+</xen:if>
+			</dl>]]></replace>
+    </modification>
+  </public_template_modifications>
+  <bb_code_media_sites/>
+  <bb_codes/>
+</addon>
