@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addon addon_id="FS_OffEmail" title="[FS] Off Email" version_string="1000010" version_id="2" url="" install_callback_class="FS_OffEmail_Install" install_callback_method="install" uninstall_callback_class="FS_OffEmail_Install" uninstall_callback_method="uninstallCode">
+  <admin_navigation/>
+  <admin_permissions/>
+  <admin_style_properties/>
+  <admin_templates/>
+  <admin_template_modifications/>
+  <code_events/>
+  <code_event_listeners/>
+  <cron>
+    <entry entry_id="fsOffEmailCron" cron_class="FS_OffEmail_CronEntry_OffEmail" cron_method="offEmailOnConversation" active="1"><![CDATA[{"day_type":"dom","dom":["-1"],"hours":["-1"],"minutes":["0"]}]]></entry>
+  </cron>
+  <email_templates/>
+  <email_template_modifications/>
+  <optiongroups/>
+  <permissions>
+    <permission_groups/>
+    <permissions/>
+    <interface_groups/>
+  </permissions>
+  <phrases>
+    <phrase title="cron_entry_fsOffEmailCron" version_id="2" version_string="1000010"><![CDATA[[FS] Off Email On Conversation]]></phrase>
+  </phrases>
+  <route_prefixes/>
+  <style_properties/>
+  <templates/>
+  <public_template_modifications/>
+  <bb_code_media_sites/>
+  <bb_codes/>
+</addon>
