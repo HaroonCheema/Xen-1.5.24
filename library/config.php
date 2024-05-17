@@ -15,5 +15,3 @@ $config['development']['enabled'] = true;
 $config['designer']['enabled'] = true;
 
 $config['fullUnicode'] = true;
-
-$config['development']['defaultAddOn'] = 'DeleteEmail';
