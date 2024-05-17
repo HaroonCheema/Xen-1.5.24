@@ -3,15 +3,21 @@
 class FS_ChangeMediaImage_ControllerPublic_Media extends XFCP_FS_ChangeMediaImage_ControllerPublic_Media
 {
 
-    // public function actionView()
-    // {
-    //     $parent = parent::actionView();
+    public function actionView()
+    {
+        $parent = parent::actionView();
 
+        if ($parent instanceof XenForo_ControllerResponse_View) {
 
-    //     $this->_request->setParam('canChangeImage', $mediaModel->canChangeImage($media));
+            $media = $parent->params['media'];
 
-    //     return $parent;
-    // }
+            $mediaModel = $this->_getMediaModel();
+
+            $parent->params['canChangeImage'] = $mediaModel->canChangeImage($media);
+        }
+
+        return $parent;
+    }
 
     public function actionChangeImage()
     {

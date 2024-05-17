@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addon addon_id="FS_ChangeMediaImage" title="[FS] Change Media Image" version_string="1000010" version_id="0" url="" install_callback_class="FS_ChangeMediaImage_Install" install_callback_method="install" uninstall_callback_class="FS_ChangeMediaImage_Install" uninstall_callback_method="uninstallCode">
+  <admin_navigation/>
+  <admin_permissions/>
+  <admin_style_properties/>
+  <admin_templates/>
+  <admin_template_modifications/>
+  <code_events/>
+  <code_event_listeners>
+    <listener event_id="load_class_controller" execute_order="10" callback_class="FS_ChangeMediaImage_Listener" callback_method="listenController" active="1" hint="" description="FS_EditImage_Listener::listenController"/>
+    <listener event_id="load_class_model" execute_order="10" callback_class="FS_ChangeMediaImage_Listener" callback_method="extendModelMedia" active="1" hint="" description="FS_EditImage_Listener::extendModelMedia"/>
+  </code_event_listeners>
+  <cron/>
+  <email_templates/>
+  <email_template_modifications/>
+  <optiongroups/>
+  <permissions>
+    <permission_groups>
+      <permission_group permission_group_id="fsChangeMediaImagePer"/>
+    </permission_groups>
+    <permissions>
+      <permission permission_group_id="fsChangeMediaImagePer" permission_id="fs_change_other_image" permission_type="flag" default_value="unset" interface_group_id="fsChangeMediaImageGroup" display_order="1"/>
+      <permission permission_group_id="fsChangeMediaImagePer" permission_id="fs_change_own_image" permission_type="flag" default_value="unset" interface_group_id="fsChangeMediaImageGroup" display_order="1"/>
+    </permissions>
+    <interface_groups>
+      <interface_group interface_group_id="fsChangeMediaImageGroup" display_order="1"/>
+    </interface_groups>
+  </permissions>
+  <phrases>
+    <phrase title="fs_change_media_image_btn" version_id="0" version_string="1000010"><![CDATA[Change Image]]></phrase>
+    <phrase title="fs_change_media_image_ph" version_id="0" version_string="1000010"><![CDATA[Upload Media Image]]></phrase>
+    <phrase title="fs_change_media_image_upload_new_media" version_id="0" version_string="1000010"><![CDATA[Upload a new media item]]></phrase>
+    <phrase title="permission_fsChangeMediaImagePer_fs_change_other_image" version_id="0" version_string="1000010"><![CDATA[Can Change Other Media Image]]></phrase>
+    <phrase title="permission_fsChangeMediaImagePer_fs_change_own_image" version_id="0" version_string="1000010"><![CDATA[Can Change Own Media Image]]></phrase>
+    <phrase title="permission_group_fsChangeMediaImagePer" version_id="0" version_string="1000010"><![CDATA[[FS] Change Media Image Permissions]]></phrase>
+    <phrase title="permission_interface_fsChangeMediaImageGroup" version_id="0" version_string="1000010"><![CDATA[[FS] Change Media Image Permissions]]></phrase>
+  </phrases>
+  <route_prefixes/>
+  <style_properties/>
+  <templates>
+    <template title="fs_change_media_image" version_id="0" version_string="1000010"><![CDATA[<xen:title>{$media.media_title} - {xen:phrase fs_change_media_image_ph}</xen:title>
+
+<xen:require css="xengallery_album_thumbnail_upload.css" />
+
+<form action="{xen:link xengallery/change-image, $media}" method="post" enctype="multipart/form-data" class="formOverlay albumThumbnailEditor">
+
+	<div class="currentThumbnail">
+		<img src="{xen:link xengallery/full, $media, 'd={$media.last_edit_date}'}" class="thumbImage AlbumThumbs show albumThumbnail" />
+	</div>
+
+	<ul class="modifyControls">
+
+		<li class="thumbnailAction">
+			<label for="ctrl_thumbnail">{xen:phrase fs_change_media_image_upload_new_media}:</label>
+			<div><input type="file" name="changedImage" class="textCtrl thumbnailUpload" id="ctrl_thumbnail" title="{xen:phrase supported_formats_jpeg_png_gif}" /></div>
+		</li>
+	</ul>
+
+	<div class="submitUnit">
+		<input type="submit" value="{xen:phrase save_changes}" class="button primary" accesskey="s" id="ctrl_save" />
+		<input type="reset" value="{xen:phrase close}" class="button OverlayCloser overlayOnly" accesskey="d" />
+	</div>
+
+	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
+	<input type="hidden" name="_xfConfirm" value="1" />
+</form>]]></template>
+  </templates>
+  <public_template_modifications>
+    <modification template="xengallery_media_view" modification_key="fs_change_media_image_xengallery_media_view" description="fs_change_media_image_xengallery_media_view" execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[/<xen:if is="{\$canChangeThumbnail}">.*?<\/xen:if>/is]]></find>
+      <replace><![CDATA[$0
+
+<xen:if is="{$canChangeImage}">
+<a href="{xen:link xengallery/change-image, $media}" class="OverlayTrigger" data-cacheoverlay="false">{xen:phrase fs_change_media_image_btn}</a>
+</xen:if>]]></replace>
+    </modification>
+  </public_template_modifications>
+  <bb_code_media_sites/>
+  <bb_codes/>
+</addon>
