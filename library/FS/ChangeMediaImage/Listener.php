@@ -14,5 +14,9 @@ class FS_ChangeMediaImage_Listener
         if ($class == 'XenGallery_Model_Media') {
             $extend[] = 'FS_ChangeMediaImage_Model_Media';
         }
+
+        if ($class == 'XenGallery_Model_File') {
+            $extend[] = 'FS_ChangeMediaImage_Model_File';
+        }
     }
 }

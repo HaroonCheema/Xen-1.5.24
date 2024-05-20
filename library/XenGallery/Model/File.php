@@ -23,36 +23,27 @@ class XenGallery_Model_File extends XenForo_Model
 		$allowedImageExtensions = preg_split('/\s+/', trim($options->xengalleryImageExtensions));
 		$allowedVideoExtensions = preg_split('/\s+/', trim($options->xengalleryVideoExtensions));
 
-		if (in_array($extension, $allowedImageExtensions))
-		{
+		if (in_array($extension, $allowedImageExtensions)) {
 			$dimensions = array(
 				'width' => $file->getImageInfoField('width'),
 				'height' => $file->getImageInfoField('height'),
 			);
 
-			if (XenForo_Image_Abstract::canResize($dimensions['width'], $dimensions['height']))
-			{
+			if (XenForo_Image_Abstract::canResize($dimensions['width'], $dimensions['height'])) {
 				$imageFile = $file->getTempFile();
-			}
-			else
-			{
+			} else {
 				$imageFile = $options->xengalleryDefaultNoThumb;
 			}
 
 			$tempThumbFile = tempnam(XenForo_Helper_File::getTempDir(), 'xfmg');
-			if ($tempThumbFile)
-			{
+			if ($tempThumbFile) {
 				@copy($imageFile, $tempThumbFile);
 			}
-		}
-		else if (in_array($extension, $allowedVideoExtensions))
-		{
+		} else if (in_array($extension, $allowedVideoExtensions)) {
 			$fileIsVideo = true;
 
-			if ($options->get('xengalleryVideoTranscoding', 'thumbnail'))
-			{
-				try
-				{
+			if ($options->get('xengalleryVideoTranscoding', 'thumbnail')) {
+				try {
 					$video = new XenGallery_Helper_Video($file->getTempFile());
 					$tempThumbFile = $video->getKeyFrame();
 
@@ -60,33 +51,28 @@ class XenGallery_Model_File extends XenForo_Model
 
 					$dimensions['width'] = $width;
 					$dimensions['height'] = $height;
+				} catch (XenForo_Exception $e) {
 				}
-				catch (XenForo_Exception $e) {}
 			}
 
-			if (!$tempThumbFile)
-			{
+			if (!$tempThumbFile) {
 				$tempThumbFile = tempnam(XenForo_Helper_File::getTempDir(), 'xfmg');
-				if ($tempThumbFile)
-				{
+				if ($tempThumbFile) {
 					@copy($options->xengalleryDefaultNoThumb, $tempThumbFile);
 				}
 			}
-		}
-		else
-		{
+		} else {
 			// not a supported image, not a supported video, bail out.
 			return false;
 		}
 
-		if ($tempThumbFile)
-		{
+		if ($tempThumbFile) {
 			$image = new XenGallery_Helper_Image($tempThumbFile);
-			if ($image)
-			{
+			if ($image) {
 				$image->resize(
 					$dimensions['thumbnail_width'] = $options->xengalleryThumbnailDimension['width'],
-					$dimensions['thumbnail_height'] = $options->xengalleryThumbnailDimension['height'], 'crop'
+					$dimensions['thumbnail_height'] = $options->xengalleryThumbnailDimension['height'],
+					'crop'
 				);
 
 				$image->saveToPath($tempThumbFile);
@@ -97,16 +83,14 @@ class XenGallery_Model_File extends XenForo_Model
 
 		$mediaModel = $this->_getMediaModel();
 
-		try
-		{
+		try {
 			$dataDw = XenForo_DataWriter::create('XenForo_DataWriter_AttachmentData');
 
 			$filename = $file->getFileName();
 
 			$dataDw->set('user_id', $userId);
 
-			if ($fileIsVideo)
-			{
+			if ($fileIsVideo) {
 				$filename = preg_replace('/\\.[^.\\s]{3,4}$/', '.mp4', $filename);
 				$dataDw->set('file_path', $mediaModel->getVideoFilePath());
 			}
@@ -114,8 +98,7 @@ class XenGallery_Model_File extends XenForo_Model
 			$dataDw->bulkSet($dimensions);
 
 			$dataDw->setExtraData(XenForo_DataWriter_AttachmentData::DATA_TEMP_FILE, $file->getTempFile());
-			if ($tempThumbFile)
-			{
+			if ($tempThumbFile) {
 				$dataDw->setExtraData(XenForo_DataWriter_AttachmentData::DATA_TEMP_THUMB_FILE, $tempThumbFile);
 			}
 
@@ -123,19 +106,15 @@ class XenGallery_Model_File extends XenForo_Model
 			$dataDw->setExtraData(XenGallery_DataWriter_AttachmentData::DATA_XMG_DATA, true);
 
 			$dataDw->save();
-		}
-		catch (Exception $e)
-		{
-			if ($tempThumbFile)
-			{
+		} catch (Exception $e) {
+			if ($tempThumbFile) {
 				@unlink($tempThumbFile);
 			}
 
 			throw $e;
 		}
 
-		if ($tempThumbFile)
-		{
+		if ($tempThumbFile) {
 			@unlink($tempThumbFile);
 		}
 
@@ -151,7 +130,7 @@ class XenGallery_Model_File extends XenForo_Model
 
 		return $dataDw->get('data_id');
 	}
-	
+
 	/**
 	 * Gets am image resource from an existing file.
 	 *
@@ -163,139 +142,120 @@ class XenGallery_Model_File extends XenForo_Model
 	public static function getImageResource($fileName, $inputType)
 	{
 		$invalidType = false;
-	
-		try
-		{
-			switch ($inputType)
-			{
+
+		try {
+			switch ($inputType) {
 				case IMAGETYPE_GIF:
-					if (!function_exists('imagecreatefromgif'))
-					{
+					if (!function_exists('imagecreatefromgif')) {
 						return false;
 					}
 					$image = imagecreatefromgif($fileName);
 					break;
-	
+
 				case IMAGETYPE_JPEG:
-					if (!function_exists('imagecreatefromjpeg'))
-					{
+					if (!function_exists('imagecreatefromjpeg')) {
 						return false;
 					}
 					$image = imagecreatefromjpeg($fileName);
 					break;
-	
+
 				case IMAGETYPE_PNG:
-					if (!function_exists('imagecreatefrompng'))
-					{
+					if (!function_exists('imagecreatefrompng')) {
 						return false;
 					}
 					$image = imagecreatefrompng($fileName);
 					break;
-	
+
 				default:
 					$invalidType = true;
 			}
-		}
-		catch (Exception $e)
-		{
+		} catch (Exception $e) {
 			return false;
 		}
-	
-		if ($invalidType)
-		{
+
+		if ($invalidType) {
 			throw new XenForo_Exception('Invalid image type given. Expects IMAGETYPE_XXX constant.');
 		}
-	
+
 		return $image;
-	}	
-	
+	}
+
 	public function saveImageResource($image, $inputType, $oldFileName, $dataId)
 	{
 		$invalidType = false;
 		$imageData = array();
-		
-		try
-		{			
+
+		try {
 			$tmpFileName = sys_get_temp_dir() . "$dataId-" . uniqid() . '.data';
-			
+
 			$writeFilePrefixPos = strrpos($oldFileName, "$dataId-");
 			$writeFilePrefix = substr($oldFileName, 0, $writeFilePrefixPos);
-			
-			switch ($inputType)
-			{
+
+			switch ($inputType) {
 				case IMAGETYPE_GIF:
-					if (!function_exists('imagegif'))
-					{
+					if (!function_exists('imagegif')) {
 						return false;
 					}
-					
+
 					$tmpImage = imagegif($image, $tmpFileName);
-					
-					if ($tmpImage)
-					{
+
+					if ($tmpImage) {
 						$imageData = $this->fetchImageData($image, $tmpFileName, $dataId);
-							
+
 						$image = imagegif($image, $writeFilePrefix . $imageData['writeFileName']);
 					}
-					
+
 					break;
-		
+
 				case IMAGETYPE_JPEG:
-					if (!function_exists('imagejpeg'))
-					{
+					if (!function_exists('imagejpeg')) {
 						return false;
 					}
-					
+
 					$tmpImage = imagejpeg($image, $tmpFileName);
-					
-					if ($tmpImage)
-					{
+
+					if ($tmpImage) {
 						$imageData = $this->fetchImageData($image, $tmpFileName, $dataId);
-						
+
 						$image = imagejpeg($image, $writeFilePrefix . $imageData['writeFileName']);
 					}
-					
+
 					break;
-		
+
 				case IMAGETYPE_PNG:
-					if (!function_exists('imagepng'))
-					{
+					if (!function_exists('imagepng')) {
 						return false;
 					}
-					
+
 					$tmpImage = imagepng($image, $tmpFileName);
-					
-					if ($tmpImage)
-					{
+
+					if ($tmpImage) {
 						$imageData = $this->fetchImageData($image, $tmpFileName, $dataId);
-						
+
 						$image = imagepng($image, $writeFilePrefix . $imageData['writeFileName']);
 					}
 
 					break;
-		
+
 				default:
 					$invalidType = true;
 			}
-		}
-		catch (Exception $e)
-		{
+		} catch (Exception $e) {
 			return false;
 		}
-		
-		if ($invalidType)
-		{
+
+		if ($invalidType) {
 			throw new XenForo_Exception('Invalid image type given. Expects IMAGETYPE_XXX constant.');
 		}
-		
+
 		@unlink($oldFileName);
 		@unlink($tmpFileName);
-		
+
 		$imageData['writeFileName'] = $writeFilePrefix . $imageData['writeFileName'];
-		
+
 		return $imageData;
 	}
-	
+
 	public function fetchImageData($image, $fileName, $dataId)
 	{
 		return $imageData = array(
@@ -309,8 +269,7 @@ class XenGallery_Model_File extends XenForo_Model
 
 	public function addToFilesFromUrl($key, $url, &$errorText)
 	{
-		if (!Zend_Uri::check($url))
-		{
+		if (!Zend_Uri::check($url)) {
 			$errorText = new XenForo_Phrase('xengallery_please_enter_a_valid_url');
 			return false;
 		}
@@ -318,28 +277,21 @@ class XenGallery_Model_File extends XenForo_Model
 		$tempName = tempnam(XenForo_Helper_File::getTempDir(), 'xfmg');
 		$originalName = basename(parse_url($url, PHP_URL_PATH));
 
-		try
-		{
-			if (method_exists('XenForo_Helper_Http', 'getUntrustedClient'))
-			{
+		try {
+			if (method_exists('XenForo_Helper_Http', 'getUntrustedClient')) {
 				$client = XenForo_Helper_Http::getUntrustedClient($url);
-			}
-			else
-			{
+			} else {
 				$client = XenForo_Helper_Http::getClient($url);
 			}
 
 			$request = $client->request('GET');
-			if (!$request->isSuccessful())
-			{
+			if (!$request->isSuccessful()) {
 				$errorText = new XenForo_Phrase('xengallery_no_media_found_at_the_url_provided');
 				return false;
 			}
 
 			$rawImage = $request->getBody();
-		}
-		catch (Exception $e)
-		{
+		} catch (Exception $e) {
 			$errorText = new XenForo_Phrase('xengallery_no_media_found_at_the_url_provided');
 			return false;
 		}
@@ -351,8 +303,7 @@ class XenGallery_Model_File extends XenForo_Model
 
 		$imageInfo = @getimagesize($rawImage);
 		$mimeType = '';
-		if ($imageInfo)
-		{
+		if ($imageInfo) {
 			$mimeType = $imageInfo['mime'];
 		}
 

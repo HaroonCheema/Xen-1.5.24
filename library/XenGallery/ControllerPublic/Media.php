@@ -11,13 +11,11 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$type = $this->_input->filterSingle('type', XenForo_Input::STRING);
 
 		$mediaId = $this->_input->filterSingle('media_id', XenForo_Input::UINT);
-		if ($mediaId)
-		{
+		if ($mediaId) {
 			return $this->responseReroute(__CLASS__, 'view');
 		}
 
-		if ($this->_routeMatch->getResponseType() == 'rss')
-		{
+		if ($this->_routeMatch->getResponseType() == 'rss') {
 			return $this->getGlobalMediaRss();
 		}
 
@@ -53,10 +51,8 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$inlineModOptions = $mediaModel->prepareInlineModOptions($media);
 
 		$ignoredNames = array();
-		foreach ($media AS $item)
-		{
-			if (!empty($item['isIgnored']))
-			{
+		foreach ($media as $item) {
+			if (!empty($item['isIgnored'])) {
 				$ignoredNames[] = $item['username'];
 			}
 		}
@@ -101,7 +97,8 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			'inlineModOptions' => $inlineModOptions
 		);
 
-		return $this->_getSiteMediaWrapper('',
+		return $this->_getSiteMediaWrapper(
+			'',
 			$this->responseView('XenGallery_ViewPublic_Media_HomeCategory', 'xengallery_media_index', $viewParams)
 		);
 	}
@@ -133,24 +130,19 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$fetchOptions['join'] |= XenGallery_Model_Media::FETCH_PRIVACY;
 
 		$media = $mediaModel->getMedia($conditions, $fetchOptions);
-		foreach ($media AS $key => &$item)
-		{
-			if ($item['album_id'] > 0)
-			{
+		foreach ($media as $key => &$item) {
+			if ($item['album_id'] > 0) {
 				$albumModel = $this->_getAlbumModel();
 
 				$item = $albumModel->prepareAlbumWithPermissions($item);
-				if (!$albumModel->canViewAlbum($item, $null, $visitor))
-				{
-					unset ($media[$key]);
+				if (!$albumModel->canViewAlbum($item, $null, $visitor)) {
+					unset($media[$key]);
 				}
 			}
 
-			if ($item['category_id'] > 0)
-			{
-				if (!$this->_getCategoryModel()->canViewCategory($item, $null, $visitor))
-				{
-					unset ($media[$key]);
+			if ($item['category_id'] > 0) {
+				if (!$this->_getCategoryModel()->canViewCategory($item, $null, $visitor)) {
+					unset($media[$key]);
 				}
 			}
 		}
@@ -191,8 +183,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$media['userTags'] = $tags;
 
 		$taggedUserIds = array();
-		foreach ($tags AS $tag)
-		{
+		foreach ($tags as $tag) {
 			$taggedUserIds[] = intval($tag['user_id']);
 		}
 
@@ -233,8 +224,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$commentsPerPage = XenForo_Application::getOptions()->xengalleryMaxCommentsPerPage;
 
 		$moderated = $commentModel->canViewUnapprovedComment();
-		if (!$moderated)
-		{
+		if (!$moderated) {
 			$moderated = XenForo_Visitor::getUserId();
 		}
 
@@ -258,10 +248,8 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$inlineModOptions = $commentModel->prepareInlineModOptions($comments);
 
 		$commentIgnoredNames = array();
-		foreach ($comments AS $comment)
-		{
-			if (!empty($comment['isIgnored']))
-			{
+		foreach ($comments as $comment) {
+			if (!empty($comment['isIgnored'])) {
 				$commentIgnoredNames[] = $comment['username'];
 			}
 		}
@@ -272,8 +260,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$this->canonicalizePageNumber($commentPage, $commentsPerPage, $commentCount, 'xengallery', $media);
 
 		$date = 0;
-		if ($comments)
-		{
+		if ($comments) {
 			$date = $commentModel->getLatestDate(array(
 				'content_id' => $mediaId,
 				'content_type' => 'media'
@@ -281,14 +268,12 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		}
 
 		$linkParams = array();
-		if ($commentPage)
-		{
+		if ($commentPage) {
 			$linkParams['page'] = $commentPage;
 		}
 
 		$category = null;
-		if ($containerType == 'category')
-		{
+		if ($containerType == 'category') {
 			$category = $media; // for page criteria purposes
 		}
 
@@ -376,13 +361,10 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$comment = $this->getHelper('Editor')->getMessageText('message', $this->_input);
 		$forceDelete = $this->_input->filterSingle('delete_draft', XenForo_Input::BOOLEAN);
 
-		if (!strlen($comment) || $forceDelete)
-		{
+		if (!strlen($comment) || $forceDelete) {
 			$draftSaved = false;
 			$draftDeleted = $this->_getDraftModel()->deleteDraft($key) || $forceDelete;
-		}
-		else
-		{
+		} else {
 			$this->_getDraftModel()->saveDraft($key, $comment);
 			$draftSaved = true;
 			$draftDeleted = false;
@@ -401,8 +383,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$mediaHelper = $this->_getMediaHelper();
 		$mediaModel = $this->_getMediaModel();
 
-		if (!$mediaModel->canWatchMedia())
-		{
+		if (!$mediaModel->canWatchMedia()) {
 			return $this->responseNoPermission();
 		}
 
@@ -412,14 +393,10 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		/** @var $mediaWatchModel XenGallery_Model_MediaWatch */
 		$mediaWatchModel = $this->getModelFromCache('XenGallery_Model_MediaWatch');
 
-		if ($this->isConfirmedPost())
-		{
-			if ($this->_input->filterSingle('stop', XenForo_Input::STRING))
-			{
+		if ($this->isConfirmedPost()) {
+			if ($this->_input->filterSingle('stop', XenForo_Input::STRING)) {
 				$notifyOn = 'delete';
-			}
-			else
-			{
+			} else {
 				$notifyOn = $this->_input->filterSingle('notify_on', XenForo_Input::STRING);
 			}
 
@@ -427,8 +404,11 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			$sendEmail = $this->_input->filterSingle('send_email', XenForo_Input::BOOLEAN);
 
 			$mediaWatchModel->setMediaWatchState(
-				XenForo_Visitor::getUserId(), $mediaId,
-				$notifyOn, $sendAlert, $sendEmail
+				XenForo_Visitor::getUserId(),
+				$mediaId,
+				$notifyOn,
+				$sendAlert,
+				$sendEmail
 			);
 
 			return $this->responseRedirect(
@@ -437,11 +417,10 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 				null,
 				array('linkPhrase' => ($notifyOn != 'delete' ? new XenForo_Phrase('xengallery_unwatch_media') : new XenForo_Phrase('xengallery_watch_media')))
 			);
-		}
-		else
-		{
+		} else {
 			$mediaWatch = $mediaWatchModel->getUserMediaWatchByMediaId(
-				XenForo_Visitor::getUserId(), $mediaId
+				XenForo_Visitor::getUserId(),
+				$mediaId
 			);
 
 			$viewParams = array(
@@ -462,8 +441,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$mediaId = $this->_input->filterSingle('media_id', XenForo_Input::UINT);
 		$media = $mediaHelper->assertMediaValidAndViewable($mediaId);
 
-		if (!$mediaModel->canEditTags($media, $errorPhraseKey))
-		{
+		if (!$mediaModel->canEditTags($media, $errorPhraseKey)) {
 			throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
 		}
 
@@ -474,26 +452,22 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 		$editTags = $tagModel->getTagListForEdit('xengallery_media', $media['media_id'], $tagger->getPermission('removeOthers'));
 
-		if ($this->isConfirmedPost())
-		{
+		if ($this->isConfirmedPost()) {
 			$tags = $this->_input->filterSingle('tags', XenForo_Input::STRING);
-			if ($editTags['uneditable'])
-			{
+			if ($editTags['uneditable']) {
 				// this is mostly a sanity check; this should be ignored
 				$tags .= (strlen($tags) ? ', ' : '') . implode(', ', $editTags['uneditable']);
 			}
 			$tagger->setTags($tagModel->splitTags($tags));
 
 			$errors = $tagger->getErrors();
-			if ($errors)
-			{
+			if ($errors) {
 				return $this->responseError($errors);
 			}
 
 			$cache = $tagger->save();
 
-			if ($this->_noRedirect())
-			{
+			if ($this->_noRedirect()) {
 				$view = $this->responseView('', 'helper_tag_list', array(
 					'tags' => $cache,
 					'editUrl' => XenForo_Link::buildPublicLink('xengallery/tags', $media)
@@ -503,17 +477,13 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 					'redirect' => XenForo_Link::buildPublicLink('xengallery', $media)
 				);
 				return $view;
-			}
-			else
-			{
+			} else {
 				return $this->responseRedirect(
 					XenForo_ControllerResponse_Redirect::SUCCESS,
 					XenForo_Link::buildPublicLink('xengallery', $media)
 				);
 			}
-		}
-		else
-		{
+		} else {
 			$viewParams = array(
 				'media' => $media,
 				'tags' => $editTags,
@@ -532,8 +502,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$mediaId = $this->_input->filterSingle('media_id', XenForo_Input::UINT);
 		$lastMediaId = $this->_input->filterSingle('last_media_id', XenForo_Input::UINT);
 
-		if ($lastMediaId)
-		{
+		if ($lastMediaId) {
 			$mediaId = $lastMediaId;
 		}
 
@@ -566,13 +535,11 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 		$customOrder = ($media['album_default_order'] == 'custom' ? true : false);
 
-		if (!$direction || $direction == 'prev')
-		{
+		if (!$direction || $direction == 'prev') {
 			$prevMedia = $mediaModel->getNextPrevMedia($customOrder ? $media['position'] : $media['media_id'], $containerId, $containerType, 'prev', $limit ? $limit : 0, $conditions, $fetchOptions, $customOrder);
 		}
 
-		if (!$direction || $direction == 'next')
-		{
+		if (!$direction || $direction == 'next') {
 			$nextMedia = $mediaModel->getNextPrevMedia($customOrder ? $media['position'] : $media['media_id'], $containerId, $containerType, 'next', $limit ? $limit : 0, $conditions, $fetchOptions, $customOrder);
 		}
 
@@ -606,10 +573,8 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$categories = $categoryModel->prepareCategories($categories);
 
 		$canAddMediaToCategory = false;
-		foreach ($categories AS $category)
-		{
-			if ($category['canAddMedia'])
-			{
+		foreach ($categories as $category) {
+			if ($category['canAddMedia']) {
 				$canAddMediaToCategory = true;
 				break;
 			}
@@ -626,8 +591,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			'album' => $album
 		);
 
-		if ($canAddMediaToAlbum)
-		{
+		if ($canAddMediaToAlbum) {
 			$albumConditions = array(
 				'add_user_id' => XenForo_Visitor::getUserId()
 			);
@@ -636,7 +600,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			);
 
 			$albums = $albumModel->getAlbumsByAddPermission($albumConditions, $albumFetchOptions);
-			list ($users, $groupedAlbums) = $albumModel->groupAlbumsByUser($albums);
+			list($users, $groupedAlbums) = $albumModel->groupAlbumsByUser($albums);
 
 			$viewParams = array_merge($viewParams, array(
 				'groupedAlbums' => $groupedAlbums,
@@ -645,7 +609,8 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			));
 		}
 
-		return $this->_getSiteMediaWrapper('',
+		return $this->_getSiteMediaWrapper(
+			'',
 			$this->responseView('XenGallery_ViewPublic_Media_Add', 'xengallery_media_add', $viewParams)
 		);
 	}
@@ -654,8 +619,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 	{
 		$category = array();
 
-		if ($categoryId = $this->_input->filterSingle('category_id', XenForo_Input::UINT))
-		{
+		if ($categoryId = $this->_input->filterSingle('category_id', XenForo_Input::UINT)) {
 			$categoryModel = $this->_getCategoryModel();
 			$category = $categoryModel->getCategoryById($categoryId);
 			$category = $categoryModel->prepareCategory($category);
@@ -674,8 +638,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 	public function actionEdit()
 	{
 		$mediaId = $this->_input->filterSingle('media_id', XenForo_Input::UINT);
-		if (!$mediaId)
-		{
+		if (!$mediaId) {
 			return $this->responseRedirect(
 				XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT,
 				XenForo_Link::buildPublicLink('xengallery')
@@ -689,19 +652,15 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$mediaHelper->assertCanEditMedia($media);
 		$media = $mediaModel->prepareMedia($media);
 
-		if ($media['album_id'])
-		{
+		if ($media['album_id']) {
 			$albumModel = $this->_getAlbumModel();
 
 			$album = $albumModel->getAlbumById($media['album_id']);
 
-			if ($album)
-			{
+			if ($album) {
 				$album = $albumModel->prepareAlbum($album);
 				$fieldCache = $album['albumFieldCache'];
-			}
-			else
-			{
+			} else {
 				$album = array(
 					'canUploadImage' => $albumModel->canUploadImage(),
 					'canUploadVideo' => $albumModel->canUploadVideo(),
@@ -717,9 +676,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			);
 
 			$containers = $albumModel->getAlbums($albumConditions);
-		}
-		else
-		{
+		} else {
 			$categoryModel = $this->_getCategoryModel();
 
 			$category = $mediaHelper->assertCategoryValidAndViewable($media['category_id']);
@@ -746,12 +703,9 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$customFields = $fieldModel->prepareGalleryFields($fieldModel->getGalleryFields(array(), array('valueMediaId' => $mediaId)), true);
 
 		$shownFields = array();
-		foreach ($fieldCache AS $fields)
-		{
-			foreach ($fields AS $fieldId)
-			{
-				if (isset($customFields[$fieldId]))
-				{
+		foreach ($fieldCache as $fields) {
+			foreach ($fields as $fieldId) {
+				if (isset($customFields[$fieldId])) {
 					$shownFields[$customFields[$fieldId]['display_group']][$fieldId] = $customFields[$fieldId];
 				}
 			}
@@ -776,14 +730,12 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			'customFields' => $shownFields
 		);
 
-		if ($media['category_id'])
-		{
-			return $this->_getSiteMediaWrapper($media['category_id'],
+		if ($media['category_id']) {
+			return $this->_getSiteMediaWrapper(
+				$media['category_id'],
 				$this->responseView('XenGallery_ViewPublic_Media_Edit', 'xengallery_media_edit', $viewParams)
 			);
-		}
-		else
-		{
+		} else {
 			return $this->_getAlbumMediaWrapper(
 				$this->responseView('XenGallery_ViewPublic_Media_Edit', 'xengallery_media_edit', $viewParams)
 			);
@@ -793,8 +745,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 	public function actionMove()
 	{
 		$mediaId = $this->_input->filterSingle('media_id', XenForo_Input::UINT);
-		if (!$mediaId)
-		{
+		if (!$mediaId) {
 			return $this->responseRedirect(
 				XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT,
 				XenForo_Link::buildPublicLink('xengallery')
@@ -813,23 +764,19 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$moveToAnyAlbum = $mediaModel->canMoveMediaToAnyAlbum($media, $error);
 		$canCreateAlbums = $albumModel->canCreateAlbum();
 
-		if ($this->isConfirmedPost())
-		{
+		if ($this->isConfirmedPost()) {
 			$redirectMessage = new XenForo_Phrase('xengallery_your_media_has_been_moved_successfully');
 
 			$albumId = $this->_input->filterSingle('album_id', XenForo_Input::UINT);
-			if ($albumId)
-			{
+			if ($albumId) {
 				$album = $mediaHelper->assertAlbumValidAndViewable($albumId);
-				if ($album['album_user_id'] != XenForo_Visitor::getUserId() && !$moveToAnyAlbum)
-				{
+				if ($album['album_user_id'] != XenForo_Visitor::getUserId() && !$moveToAnyAlbum) {
 					throw $this->getErrorOrNoPermissionResponseException($error);
 				}
 			}
 
 			$categoryId = $this->_input->filterSingle('category_id', XenForo_Input::UINT);
-			if ($categoryId)
-			{
+			if ($categoryId) {
 				$category = $mediaHelper->assertCategoryValidAndViewable($categoryId);
 			}
 
@@ -837,18 +784,14 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			$mediaWriter->setExistingData($media);
 
 			$moved = false;
-			if ($albumId || $categoryId)
-			{
-				if ($albumId)
-				{
+			if ($albumId || $categoryId) {
+				if ($albumId) {
 					$mediaWriter->bulkSet(array(
 						'album_id' => $album['album_id'],
 						'category_id' => 0,
 						'media_privacy' => $album['access_type']
 					));
-				}
-				else
-				{
+				} else {
 					$mediaWriter->bulkSet(array(
 						'category_id' => $category['category_id'],
 						'album_id' => 0,
@@ -856,13 +799,10 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 					));
 				}
 				$moved = $mediaWriter->save();
-			}
-			else
-			{
+			} else {
 				$visitor = XenForo_Visitor::getInstance();
 
-				if ($canCreateAlbums)
-				{
+				if ($canCreateAlbums) {
 					$albumInput = $this->_input->filter(array(
 						'album_title' => XenForo_Input::STRING,
 						'album_description' => XenForo_Input::STRING
@@ -884,16 +824,14 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 					$albumWriter->save();
 					$album = $albumModel->getAlbumById($albumWriter->get('album_id'));
 
-					if ($albumModel->canWatchAlbum() && $visitor->xengallery_default_album_watch_state)
-					{
+					if ($albumModel->canWatchAlbum() && $visitor->xengallery_default_album_watch_state) {
 						$albumWatchModel = $this->_getAlbumWatchModel();
 
 						$notifyOn = 'media_comment';
 						$sendAlert = true;
 						$sendEmail = false;
 
-						if ($visitor->xengallery_default_album_watch_state == 'watch_email')
-						{
+						if ($visitor->xengallery_default_album_watch_state == 'watch_email') {
 							$sendEmail = true;
 						}
 
@@ -911,13 +849,10 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 				}
 			}
 
-			if ($categoryId)
-			{
+			if ($categoryId) {
 				$container = 'category';
 				$containerTitle = $category['category_title'];
-			}
-			else
-			{
+			} else {
 				$container = 'album';
 				$containerTitle = $album['album_title'];
 			}
@@ -929,9 +864,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 				XenForo_Link::buildPublicLink('xengallery', $media),
 				$moved ? $redirectMessage : ''
 			);
-		}
-		else
-		{
+		} else {
 			$categories = $categoryModel->getCategoryStructure();
 			$categories = $categoryModel->prepareCategories($categories);
 
@@ -956,8 +889,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 	public function actionDelete()
 	{
 		$mediaId = $this->_input->filterSingle('media_id', XenForo_Input::UINT);
-		if (!$mediaId)
-		{
+		if (!$mediaId) {
 			return $this->responseRedirect(
 				XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT,
 				XenForo_Link::buildPublicLink('xengallery')
@@ -974,19 +906,15 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$media = $mediaModel->prepareMedia($media);
 		$mediaHelper->assertCanDeleteMedia($media, $deleteType);
 
-		if ($this->isConfirmedPost())
-		{
+		if ($this->isConfirmedPost()) {
 			$writer = XenForo_DataWriter::create('XenGallery_DataWriter_Media');
 			$writer->setExistingData($media['media_id']);
 
 			$reason = $this->_input->filterSingle('reason', XenForo_Input::STRING);
 
-			if ($hardDelete)
-			{
+			if ($hardDelete) {
 				$writer->delete();
-			}
-			else
-			{
+			} else {
 				$writer->setExtraData(XenGallery_DataWriter_Media::DATA_DELETE_REASON, $reason);
 				$writer->set('media_state', 'deleted');
 				$writer->save();
@@ -996,12 +924,9 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			$this->_logChanges($writer, $media, 'delete_' . $deleteType, array('reason' => $reason));
 
 			$redirectLink = '';
-			if ($media['album_id'])
-			{
+			if ($media['album_id']) {
 				$redirectLink = XenForo_Link::buildPublicLink('xengallery/albums', $media);
-			}
-			else if ($media['category_id'])
-			{
+			} else if ($media['category_id']) {
 				$redirectLink = XenForo_Link::buildPublicLink('xengallery/categories', $media);
 			}
 
@@ -1010,9 +935,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 				$redirectLink,
 				new XenForo_Phrase('xengallery_media_deleted_successfully')
 			);
-		}
-		else
-		{
+		} else {
 			$viewParams = array(
 				'media' => $media,
 				'canHardDelete' => $mediaModel->canDeleteMedia($media, 'hard'),
@@ -1026,8 +949,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 	public function actionUndelete()
 	{
 		$mediaId = $this->_input->filterSingle('media_id', XenForo_Input::UINT);
-		if (!$mediaId)
-		{
+		if (!$mediaId) {
 			return $this->responseRedirect(
 				XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT,
 				XenForo_Link::buildPublicLink('xengallery')
@@ -1039,8 +961,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 		$media = $mediaModel->getMediaById($mediaId, $this->_getMediaFetchOptions());
 
-		if ($media['media_state'] != 'deleted')
-		{
+		if ($media['media_state'] != 'deleted') {
 			return $this->responseRedirect(
 				XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT,
 				XenForo_Link::buildPublicLink('xengallery', $media)
@@ -1049,8 +970,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 		$mediaHelper->assertCanDeleteMedia($media);
 
-		if ($this->isConfirmedPost())
-		{
+		if ($this->isConfirmedPost()) {
 			$writer = XenForo_DataWriter::create('XenGallery_DataWriter_Media');
 			$writer->setExistingData($media['media_id']);
 
@@ -1063,9 +983,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 				XenForo_ControllerResponse_Redirect::SUCCESS,
 				XenForo_Link::buildPublicLink('xengallery', $media)
 			);
-		}
-		else
-		{
+		} else {
 			$viewParams = array(
 				'media' => $media
 			);
@@ -1079,8 +997,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$mediaId = $this->_input->filterSingle('media_id', XenForo_Input::UINT);
 		$media = $this->_getMediaHelper()->assertMediaValidAndViewable($mediaId);
 
-		if (!$this->_getUserModel()->canViewIps($error))
-		{
+		if (!$this->_getUserModel()->canViewIps($error)) {
 			throw $this->getErrorOrNoPermissionResponseException($error);
 		}
 
@@ -1088,8 +1005,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 		$ipInfo = $this->getModelFromCache('XenForo_Model_Ip')->getContentIpInfo($media);
 
-		if (empty($ipInfo['contentIp']))
-		{
+		if (empty($ipInfo['contentIp'])) {
 			return $this->responseError(new XenForo_Phrase('no_ip_information_available'));
 		}
 
@@ -1109,16 +1025,13 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$mediaHelper = $this->_getMediaHelper();
 		$media = $mediaHelper->assertMediaValidAndViewable($mediaId);
 
-		if (!$this->_getUserModel()->canReportContent($error))
-		{
+		if (!$this->_getUserModel()->canReportContent($error)) {
 			return $this->responseError($error);
 		}
 
-		if ($this->isConfirmedPost())
-		{
+		if ($this->isConfirmedPost()) {
 			$reportMessage = $this->_input->filterSingle('message', XenForo_Input::STRING);
-			if (!$reportMessage)
-			{
+			if (!$reportMessage) {
 				return $this->responseError(new XenForo_Phrase('xengallery_please_enter_reason_for_reporting_this_media'));
 			}
 
@@ -1133,9 +1046,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 				XenForo_Link::buildPublicLink('xengallery', $media),
 				new XenForo_Phrase('xengallery_thank_you_for_reporting_this_media')
 			);
-		}
-		else
-		{
+		} else {
 			$viewParams = array(
 				'media' => $media,
 				'categoryBreadcrumbs' => $this->_getCategoryModel()->getCategoryBreadcrumb($media)
@@ -1152,8 +1063,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 		$media = $this->_getMediaHelper()->assertMediaValidAndViewable($mediaId);
 
-		if (!$this->_getMediaModel()->canApproveMedia($media, $errorPhraseKey))
-		{
+		if (!$this->_getMediaModel()->canApproveMedia($media, $errorPhraseKey)) {
 			throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
 		}
 
@@ -1177,8 +1087,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 		$media = $this->_getMediaHelper()->assertMediaValidAndViewable($mediaId);
 
-		if (!$this->_getMediaModel()->canUnapproveMedia($media, $errorPhraseKey))
-		{
+		if (!$this->_getMediaModel()->canUnapproveMedia($media, $errorPhraseKey)) {
 			throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
 		}
 
@@ -1206,18 +1115,15 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 		$tag = $taggingModel->getTagById($tagId);
 
-		if (!$tag)
-		{
+		if (!$tag) {
 			throw $this->getErrorOrNoPermissionResponseException(new XenForo_Phrase('xengallery_requested_tag_could_not_be_found'));
 		}
 
-		if ($visitor->user_id != $tag['user_id'])
-		{
+		if ($visitor->user_id != $tag['user_id']) {
 			throw $this->getErrorOrNoPermissionResponseException(new XenForo_Phrase('xengallery_you_cannot_approve_this_tag_request'));
 		}
 
-		if ($tag['tag_state'] != 'pending')
-		{
+		if ($tag['tag_state'] != 'pending') {
 			throw $this->getErrorOrNoPermissionResponseException(new XenForo_Phrase('xengallery_tag_request_has_already_been_processed'));
 		}
 
@@ -1244,18 +1150,15 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 		$tag = $taggingModel->getTagById($tagId);
 
-		if (!$tag)
-		{
+		if (!$tag) {
 			throw $this->getErrorOrNoPermissionResponseException(new XenForo_Phrase('xengallery_requested_tag_could_not_be_found'));
 		}
 
-		if ($visitor->user_id != $tag['user_id'])
-		{
+		if ($visitor->user_id != $tag['user_id']) {
 			throw $this->getErrorOrNoPermissionResponseException(new XenForo_Phrase('xengallery_you_cannot_approve_this_tag_request'));
 		}
 
-		if ($tag['tag_state'] != 'pending')
-		{
+		if ($tag['tag_state'] != 'pending') {
 			throw $this->getErrorOrNoPermissionResponseException(new XenForo_Phrase('xengallery_tag_request_has_already_been_processed'));
 		}
 
@@ -1276,8 +1179,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$mediaId = $this->_input->filterSingle('media_id', XenForo_Input::UINT);
 		$media = $this->_getMediaHelper()->assertMediaValidAndViewable($mediaId);
 
-		if ($this->_input->filterSingle('lightbox', XenForo_Input::BOOLEAN))
-		{
+		if ($this->_input->filterSingle('lightbox', XenForo_Input::BOOLEAN)) {
 			$mediaModel = $this->_getMediaModel();
 			$mediaModel->markMediaViewed($media);
 			$mediaModel->logMediaView($media['media_id']);
@@ -1287,8 +1189,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			XenForo_Link::buildPublicLink('xengallery/full', $media)
 		);
 
-		if ($media['media_type'] == 'video_embed' || $media['media_type'] == 'video_upload')
-		{
+		if ($media['media_type'] == 'video_embed' || $media['media_type'] == 'video_upload') {
 			return $this->responseRedirect(
 				XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT,
 				XenForo_Link::buildPublicLink('xengallery', $media)
@@ -1309,13 +1210,11 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$media = $this->_getMediaHelper()->assertMediaValidAndViewable($mediaId);
 		$media = $mediaModel->prepareMedia($media);
 
-		if (!$mediaModel->canDownloadMedia($media, $error))
-		{
+		if (!$mediaModel->canDownloadMedia($media, $error)) {
 			throw $this->getErrorOrNoPermissionResponseException($error);
 		}
 
-		if ($media['media_type'] == 'video_embed')
-		{
+		if ($media['media_type'] == 'video_embed') {
 			return $this->responseRedirect(
 				XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT,
 				XenForo_Link::buildPublicLink('xengallery', $media)
@@ -1324,8 +1223,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 		$filePath = $mediaModel->getAttachmentDataFilePath($media);
 
-		if (!file_exists($filePath) || !is_readable($filePath))
-		{
+		if (!file_exists($filePath) || !is_readable($filePath)) {
 			return $this->responseError(new XenForo_Phrase('xengallery_media_cannot_be_downloaded'));
 		}
 
@@ -1345,31 +1243,25 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$clockwise = $this->_input->filterSingle('clockwise', XenForo_Input::UINT);
 
 		$rotation = 90;
-		if ($clockwise)
-		{
+		if ($clockwise) {
 			$rotation = -90;
 		}
 
 		$mediaModel = $this->_getMediaModel();
 		$media = $this->_getMediaHelper()->assertMediaValidAndViewable($mediaId);
 
-		if (!$mediaModel->canRotateMedia($media, $errorPhraseKey))
-		{
+		if (!$mediaModel->canRotateMedia($media, $errorPhraseKey)) {
 			throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
 		}
 
 		$imageInfo = $mediaModel->rotateMedia($media, $rotation);
-		if ($imageInfo)
-		{
+		if ($imageInfo) {
 			$mediaModel->rebuildThumbnail($media, $imageInfo, true, $media['thumbnail_date']);
 
-			if (XenForo_Visitor::getUserId() != $media['user_id'])
-			{
+			if (XenForo_Visitor::getUserId() != $media['user_id']) {
 				XenForo_Model_Log::logModeratorAction('xengallery_media', $media, 'rotate');
 			}
-		}
-		else
-		{
+		} else {
 			return $this->responseError(new XenForo_Phrase('xengallery_media_cannot_be_rotated'));
 		}
 
@@ -1386,31 +1278,25 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$vertical = $this->_input->filterSingle('vertical', XenForo_Input::UINT);
 
 		$direction = 'horizontal';
-		if ($vertical)
-		{
+		if ($vertical) {
 			$direction = 'vertical';
 		}
 
 		$mediaModel = $this->_getMediaModel();
 		$media = $this->_getMediaHelper()->assertMediaValidAndViewable($mediaId);
 
-		if (!$mediaModel->canFlipMedia($media, $errorPhraseKey))
-		{
+		if (!$mediaModel->canFlipMedia($media, $errorPhraseKey)) {
 			throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
 		}
 
 		$imageInfo = $mediaModel->flipMedia($media, $direction);
-		if ($imageInfo)
-		{
+		if ($imageInfo) {
 			$mediaModel->rebuildThumbnail($media, $imageInfo, true, $media['thumbnail_date']);
 
-			if (XenForo_Visitor::getUserId() != $media['user_id'])
-			{
+			if (XenForo_Visitor::getUserId() != $media['user_id']) {
 				XenForo_Model_Log::logModeratorAction('xengallery_media', $media, 'flip');
 			}
-		}
-		else
-		{
+		} else {
 			return $this->responseError(new XenForo_Phrase('xengallery_media_cannot_be_flipped'));
 		}
 
@@ -1462,15 +1348,12 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 		$cropData = $this->_input->filterSingle('crop_data', XenForo_Input::FLOAT, array('array' => true));
 		$multiplier = $cropData['crop_multiplier'];
-		if (!$multiplier)
-		{
+		if (!$multiplier) {
 			throw $this->getErrorOrNoPermissionResponseException(new XenForo_Phrase('xengallery_an_unexpected_error_occurred_during_cropping'));
 		}
 
-		foreach ($cropData AS $key => &$cropDataItem)
-		{
-			if ($key == 'crop_multiplier')
-			{
+		foreach ($cropData as $key => &$cropDataItem) {
+			if ($key == 'crop_multiplier') {
 				continue;
 			}
 
@@ -1478,12 +1361,10 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		}
 
 		$imageInfo = $mediaModel->cropMedia($media, $cropData);
-		if ($imageInfo)
-		{
+		if ($imageInfo) {
 			$mediaModel->rebuildThumbnail($media, $imageInfo, true, $media['thumbnail_date']);
 
-			if (XenForo_Visitor::getUserId() != $media['user_id'])
-			{
+			if (XenForo_Visitor::getUserId() != $media['user_id']) {
 				XenForo_Model_Log::logModeratorAction('xengallery_media', $media, 'crop');
 			}
 		}
@@ -1547,18 +1428,15 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 		$username = $this->_input->filterSingle('username', XenForo_Input::STRING);
 
-		if ($tagSelfOnly === 'self')
-		{
-			if ($username != XenForo_Visitor::getInstance()->username)
-			{
+		if ($tagSelfOnly === 'self') {
+			if ($username != XenForo_Visitor::getInstance()->username) {
 				throw $this->getErrorOrNoPermissionResponseException(new XenForo_Phrase('xengallery_you_can_only_tag_yourself'));
 			}
 		}
 
 		$visitor = XenForo_Visitor::getInstance();
 		$user = $userModel->getUserByName($username, array('join' => XenForo_Model_User::FETCH_USER_FULL));
-		if (!$user)
-		{
+		if (!$user) {
 			return $this->responseError(new XenForo_Phrase('requested_member_not_found'), 404);
 		}
 
@@ -1574,27 +1452,21 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$tagData['tag_data'] = $this->_input->filterSingle('tag_data', XenForo_Input::FLOAT, array('array' => true));
 		$multiplier = $tagData['tag_data']['tag_multiplier'];
 
-		foreach ($tagData['tag_data'] AS $key => &$tagDataItem)
-		{
-			if ($key == 'tag_multiplier' || !$multiplier)
-			{
+		foreach ($tagData['tag_data'] as $key => &$tagDataItem) {
+			if ($key == 'tag_multiplier' || !$multiplier) {
 				continue;
 			}
 
 			$tagDataItem = $tagDataItem / $multiplier;
 		}
 
-		if (!$taggingModel->getTagByMediaAndUserId($mediaId, $user['user_id'], 'approved'))
-		{
+		if (!$taggingModel->getTagByMediaAndUserId($mediaId, $user['user_id'], 'approved')) {
 			$tagWriter = XenForo_DataWriter::create('XenGallery_DataWriter_UserTag');
 
 			$tagWriter->bulkSet($tagData);
 			$tagWriter->save();
-		}
-		else
-		{
-			if ($tagData['tag_state'] == 'approved')
-			{
+		} else {
+			if ($tagData['tag_state'] == 'approved') {
 				throw $this->getErrorOrNoPermissionResponseException(new XenForo_Phrase('xengallery_you_have_already_tagged_this_user_in_this_media'));
 			}
 		}
@@ -1637,20 +1509,16 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$mediaId = $this->_input->filterSingle('media_id', XenForo_Input::UINT);
 		$media = $mediaHelper->assertMediaValidAndViewable($mediaId);
 
-		if (!$watermarkModel->canAddWatermark($media, $error))
-		{
+		if (!$watermarkModel->canAddWatermark($media, $error)) {
 			throw $this->getErrorOrNoPermissionResponseException($error);
 		}
 
-		if ($this->isConfirmedPost())
-		{
+		if ($this->isConfirmedPost()) {
 			$watermarked = $watermarkModel->addWatermarkToImage($media);
-			if ($watermarked)
-			{
+			if ($watermarked) {
 				$this->_getMediaModel()->rebuildThumbnail($media, $watermarked, true, $media['thumbnail_date']);
 
-				if (XenForo_Visitor::getUserId() != $media['user_id'])
-				{
+				if (XenForo_Visitor::getUserId() != $media['user_id']) {
 					XenForo_Model_Log::logModeratorAction('xengallery_media', $media, 'watermark_add');
 				}
 
@@ -1659,14 +1527,10 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 					XenForo_Link::buildPublicLink('xengallery', $media),
 					new XenForo_Phrase('xengallery_watermark_add_successfully')
 				);
-			}
-			else
-			{
+			} else {
 				throw $this->getErrorOrNoPermissionResponseException(new XenForo_Phrase('xengallery_watermark_could_not_be_added'));
 			}
-		}
-		else
-		{
+		} else {
 			$viewParams = array(
 				'media' => $media
 			);
@@ -1687,18 +1551,14 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$mediaId = $this->_input->filterSingle('media_id', XenForo_Input::UINT);
 		$media = $mediaHelper->assertMediaValidAndViewable($mediaId);
 
-		if (!$watermarkModel->canRemoveWatermark($media, $error))
-		{
+		if (!$watermarkModel->canRemoveWatermark($media, $error)) {
 			throw $this->getErrorOrNoPermissionResponseException($error);
 		}
 
-		if ($this->isConfirmedPost())
-		{
+		if ($this->isConfirmedPost()) {
 			$removed = $watermarkModel->removeWatermarkFromImage($media);
-			if ($removed)
-			{
-				if (XenForo_Visitor::getUserId() != $media['user_id'])
-				{
+			if ($removed) {
+				if (XenForo_Visitor::getUserId() != $media['user_id']) {
 					XenForo_Model_Log::logModeratorAction('xengallery_media', $media, 'watermark_remove');
 				}
 
@@ -1707,14 +1567,10 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 					XenForo_Link::buildPublicLink('xengallery', $media),
 					new XenForo_Phrase('xengallery_watermark_removed_successfully')
 				);
-			}
-			else
-			{
+			} else {
 				throw $this->getErrorOrNoPermissionResponseException(new XenForo_Phrase('xengallery_watermark_could_not_be_removed'));
 			}
-		}
-		else
-		{
+		} else {
 			$viewParams = array(
 				'media' => $media
 			);
@@ -1735,15 +1591,12 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$mediaId = $this->_input->filterSingle('media_id', XenForo_Input::UINT);
 		$media = $mediaHelper->assertMediaValidAndViewable($mediaId);
 
-		if ($this->isConfirmedPost())
-		{
-			if (!XenForo_Visitor::getInstance()->canUploadAvatar())
-			{
+		if ($this->isConfirmedPost()) {
+			if (!XenForo_Visitor::getInstance()->canUploadAvatar()) {
 				return $this->responseNoPermission();
 			}
 
-			if (!$mediaModel->canSetAvatar($media, $error))
-			{
+			if (!$mediaModel->canSetAvatar($media, $error)) {
 				throw $this->getErrorOrNoPermissionResponseException($error);
 			}
 
@@ -1755,9 +1608,8 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			$filePath = $mediaModel->getOriginalDataFilePath($media, true);
 			$newTempFile = tempnam(XenForo_Helper_File::getTempDir(), 'xfmg');
 
-			$success = @copy ($filePath, $newTempFile);
-			if ($success)
-			{
+			$success = @copy($filePath, $newTempFile);
+			if ($success) {
 				$avatarModel->insertAvatar($newTempFile, $visitor->user_id, $visitor->getPermissions());
 			}
 
@@ -1766,9 +1618,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 				XenForo_Link::buildPublicLink('xengallery', $media),
 				new XenForo_Phrase('xengallery_avatar_set_successfully')
 			);
-		}
-		else
-		{
+		} else {
 			$viewParams = array(
 				'media' => $media
 			);
@@ -1800,21 +1650,16 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 		$existingLike = $likeModel->getContentLikeByLikeUser('xengallery_media', $mediaId, XenForo_Visitor::getUserId());
 
-		if ($this->_request->isPost())
-		{
-			if ($existingLike)
-			{
+		if ($this->_request->isPost()) {
+			if ($existingLike) {
 				$latestUsers = $likeModel->unlikeContent($existingLike);
-			}
-			else
-			{
+			} else {
 				$latestUsers = $likeModel->likeContent('xengallery_media', $mediaId, $media['user_id']);
 			}
 
 			$liked = ($existingLike ? false : true);
 
-			if ($this->_noRedirect() && $latestUsers !== false)
-			{
+			if ($this->_noRedirect() && $latestUsers !== false) {
 				$media['likeUsers'] = $latestUsers;
 				$media['likes'] += ($liked ? 1 : -1);
 				$media['like_date'] = ($liked ? XenForo_Application::$time : 0);
@@ -1826,17 +1671,13 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 				);
 
 				return $this->responseView('XenGallery_ViewPublic_Media_LikeConfirmed', '', $viewParams);
-			}
-			else
-			{
+			} else {
 				return $this->responseRedirect(
 					XenForo_ControllerResponse_Redirect::SUCCESS,
 					XenForo_Link::buildPublicLink('xengallery', $media)
 				);
 			}
-		}
-		else
-		{
+		} else {
 			$viewParams = array(
 				'media' => $media,
 				'categoryBreadcrumbs' => $this->_getCategoryModel()->getCategoryBreadcrumb($media),
@@ -1855,8 +1696,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$media =  $mediaHelper->assertMediaValidAndViewable($mediaId);
 
 		$likes = $this->_getLikeModel()->getContentLikes('xengallery_media', $mediaId);
-		if (!$likes)
-		{
+		if (!$likes) {
 			return $this->responseError(new XenForo_Phrase('xengallery_no_one_has_liked_this_media_yet'));
 		}
 
@@ -1896,18 +1736,15 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$existing = $this->_getRatingModel()->getRatingByContentAndUser($mediaId, 'media', $visitor['user_id']);
 
 		$comment = '';
-		if ($existing)
-		{
+		if ($existing) {
 			$comment = $this->_getCommentModel()->getCommentByRatingId($existing['rating_id']);
 		}
 
-		if ($this->isConfirmedPost())
-		{
+		if ($this->isConfirmedPost()) {
 			$input['message'] = $this->getHelper('Editor')->getMessageText('message', $this->_input);
 			$input['message'] = XenForo_Helper_String::autoLinkBbCode($input['message']);
 
-			if ($canAddComment && $commentRequired && !$input['message'])
-			{
+			if ($canAddComment && $commentRequired && !$input['message']) {
 				return $this->responseError(new XenForo_Phrase('xengallery_a_comment_is_required_with_this_rating'));
 			}
 
@@ -1922,14 +1759,12 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			$ratingDw = XenForo_DataWriter::create('XenGallery_DataWriter_Rating');
 			$ratingDw->bulkSet($ratingData);
 
-			if ($existing)
-			{
+			if ($existing) {
 				$deleteDw = XenForo_DataWriter::create('XenGallery_DataWriter_Rating');
 				$deleteDw->setExistingData($existing, true);
 				$deleteDw->delete();
 
-				if ($comment)
-				{
+				if ($comment) {
 					$existingCommentDw = XenForo_DataWriter::create('XenGallery_DataWriter_Comment');
 					$existingCommentDw->setExistingData($comment);
 					$existingCommentDw->set('rating_id', 0);
@@ -1938,8 +1773,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 			$ratingDw->save();
 
-			if ($input['message'])
-			{
+			if ($input['message']) {
 				$commentDw = XenForo_DataWriter::create('XenGallery_DataWriter_Comment');
 
 				$data = array(
@@ -1957,14 +1791,13 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 				/** @var XenForo_Model_SpamPrevention $spamModel */
 				$spamModel = $this->getModelFromCache('XenForo_Model_SpamPrevention');
 
-				if (!$commentDw->hasErrors()
+				if (
+					!$commentDw->hasErrors()
 					&& $commentDw->get('comment_state') == 'visible'
 					&& $spamModel->visitorRequiresSpamCheck()
-				)
-				{
+				) {
 					$spamExtraParams = array('permalink' => XenForo_Link::buildPublicLink('media', $media));
-					switch ($result = $spamModel->checkMessageSpam($data['message'], $spamExtraParams, $this->_request))
-					{
+					switch ($result = $spamModel->checkMessageSpam($data['message'], $spamExtraParams, $this->_request)) {
 						case XenForo_Model_SpamPrevention::RESULT_MODERATED:
 							$commentDw->set('comment_state', 'moderated');
 							break;
@@ -1978,8 +1811,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 				$commentDw->preSave();
 
-				if (!$commentDw->hasErrors())
-				{
+				if (!$commentDw->hasErrors()) {
 					$this->assertNotFlooding('actionAddComment');
 				}
 
@@ -2003,9 +1835,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 					'hintText' => $hintText
 				)
 			);
-		}
-		else
-		{
+		} else {
 			$viewParams = array(
 				'media' => $media,
 				'rating' => $input['rating'],
@@ -2017,8 +1847,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 				'categoryBreadcrumbs' => $categoryBreadcrumbs,
 			);
 
-			if ($comment)
-			{
+			if ($comment) {
 				$viewParams += array(
 					'message' => $comment['message']
 				);
@@ -2069,23 +1898,19 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$mediaIds = array();
 		$mediaArray = array();
 
-		foreach ($items AS $item)
-		{
-			if ($item['type'] == 'album')
-			{
+		foreach ($items as $item) {
+			if ($item['type'] == 'album') {
 				$albumIds[] = intval($item['id']);
 			}
 
-			if ($item['type'] == 'media')
-			{
+			if ($item['type'] == 'media') {
 				$mediaIds[] = intval($item['id']);
 			}
 		}
 
 		$visitor = XenForo_Visitor::getInstance();
 
-		if ($albumIds)
-		{
+		if ($albumIds) {
 			$albumConditions = array(
 				'privacyUserId' => $visitor->user_id,
 				'album_id' => $albumIds
@@ -2099,8 +1924,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			$albums = $albumModel->prepareAlbums($albums);
 		}
 
-		if ($mediaIds)
-		{
+		if ($mediaIds) {
 			$mediaConditions = array(
 				'media_id' => $mediaIds,
 				'deleted' => $mediaModel->canViewDeletedMedia(),
@@ -2119,26 +1943,22 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			$media = $mediaModel->getMedia($mediaConditions, $mediaFetchOptions);
 			$media = $mediaModel->prepareMediaItems($media);
 
-			foreach ($media AS $mediaId => $item)
-			{
+			foreach ($media as $mediaId => $item) {
 				$canViewMedia = $mediaModel->canViewMediaItem($item);
 
 				$canViewAlbum = true;
-				if ($item['album_id'] > 0)
-				{
+				if ($item['album_id'] > 0) {
 					$item = $albumModel->prepareAlbumWithPermissions($item);
 					$canViewAlbum = $albumModel->canViewAlbum($item);
 				}
 
 				$canViewCategory = true;
-				if ($item['category_id'] > 0)
-				{
+				if ($item['category_id'] > 0) {
 					$canViewCategory = $categoryModel->canViewCategory($item);
 				}
 
-				if (!$canViewMedia || !$canViewAlbum || !$canViewCategory)
-				{
-					unset ($media[$mediaId]);
+				if (!$canViewMedia || !$canViewAlbum || !$canViewCategory) {
+					unset($media[$mediaId]);
 				}
 			}
 
@@ -2155,17 +1975,14 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			$comments = $commentsModel->getComments($commentConditions, $commentFetchOptions);
 
 			$groupedComments = array();
-			foreach ($comments AS $commentId => &$comment)
-			{
+			foreach ($comments as $commentId => &$comment) {
 				$comment = $commentsModel->prepareComments($comment);
 				$comment['message'] = XenForo_Helper_String::bbCodeStrip($comment['message']);
 				$groupedComments[$comment['content_id']][$commentId] = $comment;
 			}
 
-			foreach ($media AS &$_media)
-			{
-				if (!empty($groupedComments[$_media['media_id']]))
-				{
+			foreach ($media as &$_media) {
+				if (!empty($groupedComments[$_media['media_id']])) {
 					$_media['comments'] = $groupedComments[$_media['media_id']];
 				}
 
@@ -2173,10 +1990,8 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			}
 
 			$mediaArray = array();
-			foreach ($mediaIds AS $mediaId)
-			{
-				if (isset($media[$mediaId]))
-				{
+			foreach ($mediaIds as $mediaId) {
+				if (isset($media[$mediaId])) {
 					$mediaArray[] = $media[$mediaId];
 				}
 			}
@@ -2227,8 +2042,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		);
 
 		$templateName = 'xengallery_browser_editor';
-		if ($page > 1)
-		{
+		if ($page > 1) {
 			$templateName .= '_content';
 		}
 
@@ -2242,8 +2056,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$mediaSiteOptions = XenForo_Application::getOptions()->xengalleryMediaThumbs;
 
 		$mediaSite = $this->_input->filterSingle('id', XenForo_Input::STRING);
-		if (!$mediaSite)
-		{
+		if (!$mediaSite) {
 			return $this->responseView(
 				'XenGallery_ViewPublic_Media_Thumbnail',
 				'',
@@ -2254,8 +2067,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$parts = explode('.', $mediaSite, 2);
 
 		$videoThumbnail = $mediaModel->getVideoThumbnailFromParts($parts);
-		if (file_exists($videoThumbnail) && is_readable($videoThumbnail))
-		{
+		if (file_exists($videoThumbnail) && is_readable($videoThumbnail)) {
 			$this->getRouteMatch()->setResponseType('raw');
 
 			$viewParams = array(
@@ -2267,34 +2079,24 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 				'',
 				$viewParams
 			);
-		}
-		else
-		{
+		} else {
 			$mediaSite = false;
-			if (!empty($mediaSiteOptions[$parts[0]]))
-			{
+			if (!empty($mediaSiteOptions[$parts[0]])) {
 				$mediaSite = $mediaSiteOptions[$parts[0]];
 			}
 
-			if (strpos($mediaSite, '_'))
-			{
-				if (class_exists($mediaSite))
-				{
+			if (strpos($mediaSite, '_')) {
+				if (class_exists($mediaSite)) {
 					$thumbnailObj = XenGallery_Thumbnail_Abstract::create($mediaSite);
 					$thumbnailPath = $thumbnailObj->getThumbnailUrl($parts[1]);
-				}
-				else
-				{
+				} else {
 					$thumbnailPath = $mediaSite;
 				}
-			}
-			else
-			{
+			} else {
 				$thumbnailPath = $mediaSite;
 			}
 
-			if (strpos($thumbnailPath, '{$id}'))
-			{
+			if (strpos($thumbnailPath, '{$id}')) {
 				$this->_thumbnailPath = XenForo_Application::$externalDataPath . '/xengallery/' . $parts[0];
 				XenForo_Helper_File::createDirectory($this->_thumbnailPath, true);
 
@@ -2303,8 +2105,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 				$thumbnailPath = XenGallery_Thumbnail_Abstract::saveThumbnailFromUrl($parts[0], $parts[1], $thumbnailUrl);
 			}
 
-			if (!$thumbnailPath)
-			{
+			if (!$thumbnailPath) {
 				$thumbnailPath = XenForo_Template_Helper_Core::callHelper('dummy', array(
 					'', '', '', true
 				));
@@ -2327,8 +2128,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 	public function actionThumbnailChange()
 	{
 		$mediaId = $this->_input->filterSingle('media_id', XenForo_Input::UINT);
-		if (!$mediaId)
-		{
+		if (!$mediaId) {
 			return $this->responseRedirect(
 				XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT,
 				XenForo_Link::buildPublicLink('xengallery')
@@ -2344,26 +2144,20 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 		$mediaHelper->assertCanChangeMediaThumbnail($media);
 
-		if ($this->isConfirmedPost())
-		{
+		if ($this->isConfirmedPost()) {
 			$thumbnail = XenForo_Upload::getUploadedFile('thumbnail');
 			$delete = $this->_input->filterSingle('delete', XenForo_Input::BOOLEAN);
 
-			if ($thumbnail)
-			{
+			if ($thumbnail) {
 				$mediaModel->uploadMediaThumbnail($thumbnail, $media);
 
-				if (XenForo_Visitor::getUserId() != $media['user_id'])
-				{
+				if (XenForo_Visitor::getUserId() != $media['user_id']) {
 					XenForo_Model_Log::logModeratorAction('xengallery_media', $media, 'thumbnail_add');
 				}
-			}
-			else if ($delete)
-			{
+			} else if ($delete) {
 				$mediaModel->deleteMediaThumbnail($media);
 
-				if (XenForo_Visitor::getUserId() != $media['user_id'])
-				{
+				if (XenForo_Visitor::getUserId() != $media['user_id']) {
 					XenForo_Model_Log::logModeratorAction('xengallery_media', $media, 'thumbnail_remove');
 				}
 			}
@@ -2372,9 +2166,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 				XenForo_ControllerResponse_Redirect::SUCCESS,
 				XenForo_Link::buildPublicLink('xengallery', $media)
 			);
-		}
-		else
-		{
+		} else {
 			$viewParams = array(
 				'media' => $media,
 				'categoryBreadcrumbs' => $this->_getCategoryModel()->getCategoryBreadcrumb($media),
@@ -2397,7 +2189,8 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			'XenGallery_ViewPublic_Media_Preview',
 			'xengallery_media_preview',
 			$viewParams,
-			array('containerTemplate' =>
+			array(
+				'containerTemplate' =>
 				'xengallery_page_container'
 			)
 		);
@@ -2408,16 +2201,14 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$embedUrl = $this->_input->filterSingle('embed_url', XenForo_Input::STRING);
 
 		$mediaTag = XenForo_Helper_Media::convertMediaLinkToEmbedHtml($embedUrl);
-		if (!$mediaTag)
-		{
+		if (!$mediaTag) {
 			return $this->responseView('XenGallery_ViewPublic_Media_PreviewVideo', '', array('throwError' => true, 'notValid' => true));
 		}
 
 		preg_match('/\[media=(.*?)\](.*?)\[\/media\]/is', $mediaTag, $parts);
 
 		$allowedSites = XenForo_Application::getOptions()->xengalleryMediaSites;
-		if (!in_array($parts[1], $allowedSites))
-		{
+		if (!in_array($parts[1], $allowedSites)) {
 			return $this->responseView('XenGallery_ViewPublic_Media_PreviewVideo', '', array('throwError' => true, 'notAllowed' => true));
 		}
 
@@ -2432,8 +2223,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$videoThumbnail = $mediaModel->getVideoThumbnailUrlFromParts($parts);
 		$media['thumbnailUrl'] = $videoThumbnail;
 
-		if (!$videoThumbnail)
-		{
+		if (!$videoThumbnail) {
 			$media['noThumb'] = true;
 		}
 
@@ -2442,24 +2232,19 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 		$category = array();
 
-		if ($containerType == 'category')
-		{
+		if ($containerType == 'category') {
 			$categoryModel = $this->_getCategoryModel();
 			$category = $categoryModel->getCategoryById($containerId);
-			if (!$category)
-			{
+			if (!$category) {
 				return $this->getNotFoundResponse();
 			}
 			$category = $categoryModel->prepareCategory($category);
 
 			$fieldCache = $category['categoryFieldCache'];
-		}
-		else
-		{
+		} else {
 			$albumModel = $this->_getAlbumModel();
 			$album = $albumModel->getAlbumByIdSimple($containerId);
-			if (!$album)
-			{
+			if (!$album) {
 				return $this->getNotFoundResponse();
 			}
 			$album = $albumModel->prepareAlbum($album);
@@ -2472,15 +2257,11 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 		$hasRequiredFields = false;
 		$shownFields = array();
-		foreach ($fieldCache AS $fields)
-		{
-			foreach ($fields AS $fieldId)
-			{
-				if (isset($customFields[$fieldId]))
-				{
+		foreach ($fieldCache as $fields) {
+			foreach ($fields as $fieldId) {
+				if (isset($customFields[$fieldId])) {
 					$shownFields[$customFields[$fieldId]['display_group']][$fieldId] = $customFields[$fieldId];
-					if ($customFields[$fieldId]['required'])
-					{
+					if ($customFields[$fieldId]['required']) {
 						$hasRequiredFields = true;
 					}
 				}
@@ -2517,24 +2298,19 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$album = array();
 		$category = array();
 
-		if ($containerType == 'album')
-		{
+		if ($containerType == 'album') {
 			$albumModel = $this->_getAlbumModel();
 
 			$album = $albumModel->getAlbumById($containerId);
 
-			if ($album)
-			{
+			if ($album) {
 				$album = $albumModel->prepareAlbum($album);
 				$album = $albumModel->prepareAlbumWithPermissions($album);
 
-				if (!$albumModel->canAddMediaToAlbum($album, $error))
-				{
+				if (!$albumModel->canAddMediaToAlbum($album, $error)) {
 					throw $this->getErrorOrNoPermissionResponseException($error);
 				}
-			}
-			else
-			{
+			} else {
 				$album = array(
 					'canUploadImage' => $albumModel->canUploadImage(),
 					'canUploadVideo' => $albumModel->canUploadVideo(),
@@ -2543,16 +2319,13 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			}
 
 			$container = $album;
-		}
-		else
-		{
+		} else {
 			$categoryModel = $this->_getCategoryModel();
 
 			$category = $mediaHelper->assertCategoryValidAndViewable($containerId);
 			$category = $categoryModel->prepareCategory($category);
 
-			if (!$categoryModel->canAddMediaToCategory($category, $error))
-			{
+			if (!$categoryModel->canAddMediaToCategory($category, $error)) {
 				throw $this->getErrorOrNoPermissionResponseException($error);
 			}
 
@@ -2562,17 +2335,14 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$mediaSites = $this->getModelFromCache('XenForo_Model_BbCode')->getAllBbCodeMediaSites();
 		$allowedSites = XenForo_Application::getOptions()->xengalleryMediaSites;
 
-		foreach ($mediaSites AS $key => $mediaSite)
-		{
-			if (!in_array($mediaSite['media_site_id'], $allowedSites))
-			{
-				unset ($mediaSites[$key]);
+		foreach ($mediaSites as $key => $mediaSite) {
+			if (!in_array($mediaSite['media_site_id'], $allowedSites)) {
+				unset($mediaSites[$key]);
 			}
 		}
 
 		$linkParams = array();
-		if ($category)
-		{
+		if ($category) {
 			$linkParams['category_id'] = $category['category_id'];
 		}
 
@@ -2606,23 +2376,18 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$username = $this->_input->filterSingle('username', XenForo_Input::STRING);
 		$user = $userModel->getUserByName($username, array('join' => XenForo_Model_User::FETCH_USER_FULL));
 
-		if ($user)
-		{
+		if ($user) {
 			$albumConditions = array(
 				'album_user_id' => $user['user_id']
 			);
 			$albums = $albumModel->getAlbums($albumConditions);
-			foreach ($albums AS $key => $album)
-			{
+			foreach ($albums as $key => $album) {
 				$album = $albumModel->prepareAlbumWithPermissions($album);
-				if (!$albumModel->canViewAlbum($album))
-				{
-					unset ($albums[$key]);
+				if (!$albumModel->canViewAlbum($album)) {
+					unset($albums[$key]);
 				}
 			}
-		}
-		else
-		{
+		} else {
 			$albums = array();
 		}
 
@@ -2658,39 +2423,32 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 		$input['comment_state'] = $commentModel->getCommentInsertState();
 
-		if ($input['content_type'] == 'media')
-		{
+		if ($input['content_type'] == 'media') {
 			$content = $mediaHelper->assertMediaValidAndViewable($input['content_id']);
-			if ($mediaModel->canWatchMedia() && $visitor['xengallery_default_media_watch_state'])
-			{
+			if ($mediaModel->canWatchMedia() && $visitor['xengallery_default_media_watch_state']) {
 				$mediaWatchModel = $this->_getMediaWatchModel();
 
 				$notifyOn = 'comment';
 				$sendAlert = true;
 				$sendEmail = false;
 
-				if ($visitor['xengallery_default_media_watch_state'] == 'watch_email')
-				{
+				if ($visitor['xengallery_default_media_watch_state'] == 'watch_email') {
 					$sendEmail = true;
 				}
 
 				$mediaWatchModel->setMediaWatchState($visitor['user_id'], $input['content_id'], $notifyOn, $sendAlert, $sendEmail);
 			}
 			$redirectLink = XenForo_Link::buildPublicLink('xengallery', $content);
-		}
-		else
-		{
+		} else {
 			$content = $mediaHelper->assertAlbumValidAndViewable($input['content_id']);
-			if ($albumModel->canWatchAlbum() && $visitor['xengallery_default_album_watch_state'])
-			{
+			if ($albumModel->canWatchAlbum() && $visitor['xengallery_default_album_watch_state']) {
 				$albumWatchModel = $this->_getAlbumWatchModel();
 
 				$notifyOn = 'media_comment';
 				$sendAlert = true;
 				$sendEmail = false;
 
-				if ($visitor['xengallery_default_album_watch_state'] == 'watch_email')
-				{
+				if ($visitor['xengallery_default_album_watch_state'] == 'watch_email') {
 					$sendEmail = true;
 				}
 
@@ -2704,18 +2462,16 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 		$writer = XenForo_DataWriter::create('XenGallery_DataWriter_Comment');
 
-		if ($commentId)
-		{
+		if ($commentId) {
 			$writer->setExistingData($commentId);
 			$writer->set('user_id', $writer->get('user_id'));
 			$writer->set('message', $input['message']);
-		}
-		else
-		{
+		} else {
 			$visitor = XenForo_Visitor::getInstance();
 
 			$writer->setOption(
-				XenGallery_DataWriter_Comment::OPTION_MAX_TAGGED_USERS, $visitor->hasPermission('general', 'maxTaggedUsers')
+				XenGallery_DataWriter_Comment::OPTION_MAX_TAGGED_USERS,
+				$visitor->hasPermission('general', 'maxTaggedUsers')
 			);
 			$writer->set('content_id', $input['content_id']);
 			$writer->set('content_type', $input['content_type']);
@@ -2728,14 +2484,13 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		/** @var XenForo_Model_SpamPrevention $spamModel */
 		$spamModel = $this->getModelFromCache('XenForo_Model_SpamPrevention');
 
-		if (!$writer->hasErrors()
+		if (
+			!$writer->hasErrors()
 			&& $writer->get('comment_state') == 'visible'
 			&& $spamModel->visitorRequiresSpamCheck()
-		)
-		{
+		) {
 			$spamExtraParams = array('permalink' => $redirectLink);
-			switch ($spamModel->checkMessageSpam($input['message'], $spamExtraParams, $this->_request))
-			{
+			switch ($spamModel->checkMessageSpam($input['message'], $spamExtraParams, $this->_request)) {
 				case XenForo_Model_SpamPrevention::RESULT_MODERATED:
 					$writer->set('comment_state', 'moderated');
 					break;
@@ -2749,8 +2504,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 		$writer->preSave();
 
-		if (!$writer->hasErrors())
-		{
+		if (!$writer->hasErrors()) {
 			$this->assertNotFlooding('actionAddComment');
 		}
 
@@ -2761,8 +2515,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$spamModel->logSpamTrigger('xengallery_comment', $comment['comment_id']);
 
 		// only run this code if the action has been loaded via XenForo.ajax()
-		if ($this->_noRedirect())
-		{
+		if ($this->_noRedirect()) {
 			$commentModel = $this->_getCommentModel();
 
 			$date = $this->_input->filterSingle('date', XenForo_Input::UINT);
@@ -2771,17 +2524,13 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			$comments = $commentModel->prepareComments($comments);
 			$inlineModOptions = $commentModel->prepareInlineModOptions($comments);
 
-			foreach ($comments AS $key => $comment)
-			{
-				if (!$commentModel->canViewDeletedComment() && $comment['comment_state'] == 'deleted')
-				{
+			foreach ($comments as $key => $comment) {
+				if (!$commentModel->canViewDeletedComment() && $comment['comment_state'] == 'deleted') {
 					unset($comments[$key]);
 				}
 
-				if ($comment['user_id'] != $visitor->user_id)
-				{
-					if (!$commentModel->canViewUnapprovedComment() && $comment['comment_state'] == 'moderated')
-					{
+				if ($comment['user_id'] != $visitor->user_id) {
+					if (!$commentModel->canViewUnapprovedComment() && $comment['comment_state'] == 'moderated') {
 						unset($comments[$key]);
 					}
 				}
@@ -2820,8 +2569,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 	{
 		$mediaModel = $this->_getMediaModel();
 
-		foreach ($inputArray AS $input)
-		{
+		foreach ($inputArray as $input) {
 			$media = $mediaModel->getMediaById($otherInput['media_id'], array(
 				'join' => XenGallery_Model_Media::FETCH_ALBUM
 					| XenGallery_Model_Media::FETCH_CATEGORY
@@ -2833,8 +2581,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 			$tagger = null;
 
-			if ($mediaModel->canEditTags($media))
-			{
+			if ($mediaModel->canEditTags($media)) {
 				/** @var XenForo_Model_Tag $tagModel */
 				$tagModel = $this->getModelFromCache('XenForo_Model_Tag');
 				$tagger = $tagModel->getTagger('xengallery_media');
@@ -2843,8 +2590,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 				$editTags = $tagModel->getTagListForEdit('xengallery_media', $media['media_id'], $tagger->getPermission('removeOthers'));
 
-				if ($editTags['uneditable'])
-				{
+				if ($editTags['uneditable']) {
 					// this is mostly a sanity check; this should be ignored
 					$input['tags'] .= (strlen($input['tags']) ? ', ' : '') . implode(', ', $editTags['uneditable']);
 				}
@@ -2861,20 +2607,15 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 				'media_tag' => ''
 			), $input);
 
-			if (!empty($data['media_embed_url_original']))
-			{
-				if ($data['media_embed_url'] && $mediaModel->canEditEmbedUrl($media))
-				{
+			if (!empty($data['media_embed_url_original'])) {
+				if ($data['media_embed_url'] && $mediaModel->canEditEmbedUrl($media)) {
 					$data['media_tag'] = XenForo_Helper_Media::convertMediaLinkToEmbedHtml($data['media_embed_url']);
-					if (!$data['media_tag'])
-					{
+					if (!$data['media_tag']) {
 						throw $this->responseException(
 							$this->responseError(new XenForo_Phrase('xengallery_not_a_valid_media_site'))
 						);
 					}
-				}
-				else
-				{
+				} else {
 					$data['media_embed_url'] = $data['media_embed_url_original'];
 				}
 			}
@@ -2883,8 +2624,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			$mediaWriter->bulkSet($data);
 			$mediaWriter->save();
 
-			if ($tagger)
-			{
+			if ($tagger) {
 				$tagger->save();
 			}
 
@@ -2927,23 +2667,19 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			'video_upload_hash' => XenForo_Input::STRING
 		));
 
-		if (!$otherInput['media_id'])
-		{
+		if (!$otherInput['media_id']) {
 			$mediaHelper->assertCanAddMedia();
 
-			if ($containerType == 'category')
-			{
+			if ($containerType == 'category') {
 				$categoryModel = $this->_getCategoryModel();
 
 				$category = $mediaHelper->assertCategoryValidAndViewable($containerId);
 
-				if (!$categoryModel->canAddMediaToCategory($category, $error))
-				{
+				if (!$categoryModel->canAddMediaToCategory($category, $error)) {
 					throw $this->getErrorOrNoPermissionResponseException($error);
 				}
 
-				if ($categoryModel->canWatchCategory() && $visitor->xengallery_default_category_watch_state)
-				{
+				if ($categoryModel->canWatchCategory() && $visitor->xengallery_default_category_watch_state) {
 					$categoryWatchModel = $this->_getCategoryWatchModel();
 
 					$notifyOn = 'media';
@@ -2951,8 +2687,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 					$sendEmail = false;
 					$includeChildren = true;
 
-					if ($visitor->xengallery_default_category_watch_state == 'watch_email')
-					{
+					if ($visitor->xengallery_default_category_watch_state == 'watch_email') {
 						$sendEmail = true;
 					}
 
@@ -2960,13 +2695,10 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 				}
 
 				$redirect = XenForo_Link::buildPublicLink('xengallery/categories', $category);
-			}
-			else
-			{
+			} else {
 				$album = $mediaHelper->assertAlbumValidAndViewable($containerId);
 
-				if (!$this->_getAlbumModel()->canAddMediaToAlbum($album, $error))
-				{
+				if (!$this->_getAlbumModel()->canAddMediaToAlbum($album, $error)) {
 					throw $this->getErrorOrNoPermissionResponseException($error);
 				}
 
@@ -2974,20 +2706,19 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			}
 		}
 
-		if ($imageUploads)
-		{
+		if ($imageUploads) {
 			$imageUploadInput = $this->_input->filterSingle('image_upload', XenForo_Input::ARRAY_SIMPLE);
-			if ($otherInput['media_id'])
-			{
+
+			// echo '<pre>';
+			// var_dump($imageUploadInput);
+			// exit;
+			if ($otherInput['media_id']) {
 				$this->_saveEditedMediaProcess($imageUploadInput, $otherInput, $redirect);
-			}
-			else
-			{
+			} else {
 				$imageUploadInput['media_type'] = 'image_upload';
 
 				$imageUploadInput['media_state'] = $mediaModel->getMediaInsertState();
-				if ($imageUploadInput['media_state'] == 'moderated')
-				{
+				if ($imageUploadInput['media_state'] == 'moderated') {
 					$redirectMessage = new XenForo_Phrase('xengallery_media_has_been_saved_awaiting_approval');
 				}
 
@@ -2999,20 +2730,15 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 			}
 		}
 
-		if ($videoUploads)
-		{
+		if ($videoUploads) {
 			$videoUploadInput = $this->_input->filterSingle('video_upload', XenForo_Input::ARRAY_SIMPLE);
-			if ($otherInput['media_id'])
-			{
+			if ($otherInput['media_id']) {
 				$this->_saveEditedMediaProcess($videoUploadInput, $otherInput, $redirect);
-			}
-			else
-			{
+			} else {
 				$videoUploadInput['media_type'] = 'video_upload';
 
 				$videoUploadInput['media_state'] = $mediaModel->getMediaInsertState();
-				if ($videoUploadInput['media_state'] == 'moderated')
-				{
+				if ($videoUploadInput['media_state'] == 'moderated') {
 					$redirectMessage = new XenForo_Phrase('xengallery_media_has_been_saved_awaiting_approval');
 				}
 
@@ -3022,39 +2748,31 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 				$attachments = $mediaModel->prepareMediaItems($attachments);
 
 				$requireTranscode = $this->_associateAttachmentsAndMedia($attachments, $videoUploadInput, $album ? $album : $category);
-				if ($requireTranscode)
-				{
+				if ($requireTranscode) {
 					XenForo_Application::getSession()->set('xfmgVideoRequiresTranscode', true);
 				}
 			}
 		}
 
-		if ($videoEmbeds)
-		{
+		if ($videoEmbeds) {
 			$videoEmbedInput = $this->_input->filterSingle('video_embed', XenForo_Input::ARRAY_SIMPLE);
-			if ($otherInput['media_id'])
-			{
+			if ($otherInput['media_id']) {
 				$this->_saveEditedMediaProcess($videoEmbedInput, $otherInput, $redirect);
-			}
-			else
-			{
+			} else {
 				$mediaType = 'video_embed';
 
 				$mediaState = $mediaModel->getMediaInsertState();
-				if ($mediaState == 'moderated')
-				{
+				if ($mediaState == 'moderated') {
 					$redirectMessage = new XenForo_Phrase('xengallery_media_has_been_saved_awaiting_approval');
 				}
 
 				$container = $album ? $album : $category;
-				foreach ($videoEmbedInput AS $videoEmbed)
-				{
+				foreach ($videoEmbedInput as $videoEmbed) {
 					$mediaWriter = XenForo_DataWriter::create('XenGallery_DataWriter_Media');
 
 					$tagger = null;
 
-					if ($mediaModel->canEditTags())
-					{
+					if ($mediaModel->canEditTags()) {
 						$tagModel = $this->getModelFromCache('XenForo_Model_Tag');
 
 						/** @var XenForo_TagHandler_Tagger $tagger */
@@ -3083,23 +2801,20 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 					$media = $mediaWriter->getMergedData();
 
-					if ($tagger)
-					{
+					if ($tagger) {
 						$tagger->setContent($media['media_id'], true)->save();
 					}
 
 					$this->_updateCustomFields($videoEmbed, $media);
 
-					if ($media && $mediaModel->canWatchMedia() && $visitor['xengallery_default_media_watch_state'])
-					{
+					if ($media && $mediaModel->canWatchMedia() && $visitor['xengallery_default_media_watch_state']) {
 						$mediaWatchModel = $this->_getMediaWatchModel();
 
 						$notifyOn = 'comment';
 						$sendAlert = true;
 						$sendEmail = false;
 
-						if ($visitor['xengallery_default_media_watch_state'] == 'watch_email')
-						{
+						if ($visitor['xengallery_default_media_watch_state'] == 'watch_email') {
 							$sendEmail = true;
 						}
 
@@ -3113,7 +2828,8 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 		return $this->responseRedirect(
 			XenForo_ControllerResponse_Redirect::SUCCESS,
-			$redirect, $redirectMessage
+			$redirect,
+			$redirectMessage
 		);
 	}
 
@@ -3125,10 +2841,8 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 		$requiresTranscode = false;
 
-		foreach ($attachments AS $attachmentId => $attachment)
-		{
-			if (!isset($input[$attachmentId]))
-			{
+		foreach ($attachments as $attachmentId => $attachment) {
+			if (!isset($input[$attachmentId])) {
 				continue;
 			}
 
@@ -3151,14 +2865,12 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 				'category_id' => !empty($container['category_id']) ? $container['category_id'] : 0
 			);
 
-			if ($input['media_type'] == 'video_upload' && $mediaModel->requiresTranscoding($attachment))
-			{
+			if ($input['media_type'] == 'video_upload' && $mediaModel->requiresTranscoding($attachment)) {
 				$customFields = array();
 				$customFieldsShown = array();
 
 				$customFieldsData = $this->_updateCustomFields($attachInput, array(), true);
-				if ($customFieldsData)
-				{
+				if ($customFieldsData) {
 					list($customFields, $customFieldsShown) = $customFieldsData;
 				}
 
@@ -3173,8 +2885,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 				$attachmentFile = $mediaModel->getAttachmentDataFilePath($attachment);
 
 				// We check for tag errors and permissions here, now, so nothing will prevent the transcoding finishing later.
-				if ($mediaModel->canEditTags())
-				{
+				if ($mediaModel->canEditTags()) {
 					$tagModel = XenForo_Model::create('XenForo_Model_Tag');
 
 					/** @var XenForo_TagHandler_Tagger $tagger */
@@ -3182,15 +2893,12 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 					$tagger->setPermissionsFromContext($container)
 						->setTags($tagModel->splitTags($attachInput['tags']));
 
-					if ($tagger->getErrors())
-					{
+					if ($tagger->getErrors()) {
 						throw $this->responseException($this->responseError($tagger->getErrors()));
 					}
 
 					$transcodeData['tagger_permissions'] = $tagger->getPermissions();
-				}
-				else
-				{
+				} else {
 					unset($transcodeData['tags']);
 				}
 
@@ -3198,15 +2906,12 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 				$video->queueTranscode($transcodeData);
 
 				$requiresTranscode = true;
-			}
-			else
-			{
+			} else {
 				$mediaWriter = XenForo_DataWriter::create('XenGallery_DataWriter_Media');
 
 				$tagger = null;
 
-				if ($mediaModel->canEditTags())
-				{
+				if ($mediaModel->canEditTags()) {
 					$tagModel = $this->getModelFromCache('XenForo_Model_Tag');
 
 					/** @var XenForo_TagHandler_Tagger $tagger */
@@ -3222,8 +2927,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 				$media = $mediaWriter->getMergedData();
 
-				if ($tagger)
-				{
+				if ($tagger) {
 					$tagger->setContent($media['media_id'], true)->save();
 				}
 
@@ -3234,18 +2938,15 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 				$mediaWriter->updateUserMediaQuota();
 
-				if ($media['media_type'] == 'image_upload')
-				{
+				if ($media['media_type'] == 'image_upload') {
 					$watermarkModel = $this->_getWatermarkModel();
 
 					$options = XenForo_Application::getOptions();
-					if ($options->get('xengalleryEnableWatermarking') == 'enabled' && !$watermarkModel->canBypassWatermark())
-					{
+					if ($options->get('xengalleryEnableWatermarking') == 'enabled' && !$watermarkModel->canBypassWatermark()) {
 						$media = array_merge($media, $attachment);
 						$imageInfo = $watermarkModel->addWatermarkToImage($media);
 
-						if ($imageInfo)
-						{
+						if ($imageInfo) {
 							$mediaModel->rebuildThumbnail($media, $imageInfo);
 						}
 					}
@@ -3258,8 +2959,7 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 
 	protected function _updateCustomFields(array $input, array $media, $prepareOnly = false)
 	{
-		if (empty($input['custom_fields']))
-		{
+		if (empty($input['custom_fields'])) {
 			return;
 		}
 
@@ -3270,46 +2970,34 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 		$fields = $fieldModel->getGalleryFields();
 
 		$customFields = array();
-		foreach ($customFieldsShown AS $key)
-		{
-			if (!isset($fields[$key]))
-			{
+		foreach ($customFieldsShown as $key) {
+			if (!isset($fields[$key])) {
 				continue;
 			}
 
-			if (isset($values[$key]))
-			{
+			if (isset($values[$key])) {
 				$customFields[$key] = $values[$key];
 			}
 
 			$field = $fields[$key];
 
-			if (isset($values[$key]))
-			{
+			if (isset($values[$key])) {
 				$customFields[$key] = $values[$key];
-			}
-			else if ($field['field_type'] == 'bbcode' && isset($values[$key . '_html']))
-			{
+			} else if ($field['field_type'] == 'bbcode' && isset($values[$key . '_html'])) {
 				$messageTextHtml = strval($values[$key . '_html']);
 
-				if ($this->_input->filterSingle('_xfRteFailed', XenForo_Input::UINT))
-				{
+				if ($this->_input->filterSingle('_xfRteFailed', XenForo_Input::UINT)) {
 					// actually, the RTE failed to load, so just treat this as BB code
 					$customFields[$key] = $messageTextHtml;
-				}
-				else if ($messageTextHtml !== '')
-				{
+				} else if ($messageTextHtml !== '') {
 					$customFields[$key] = $this->getHelper('Editor')->convertEditorHtmlToBbCode($messageTextHtml, $this->_input);
-				}
-				else
-				{
+				} else {
 					$customFields[$key] = '';
 				}
 			}
 		}
 
-		if ($prepareOnly)
-		{
+		if ($prepareOnly) {
 			return array($customFields, $customFieldsShown);
 		}
 
@@ -3326,19 +3014,16 @@ class XenGallery_ControllerPublic_Media extends XenGallery_ControllerPublic_Abst
 	{
 		$q = ltrim($this->_input->filterSingle('q', XenForo_Input::STRING, array('noTrim' => true)));
 
-		if ($q !== '' && utf8_strlen($q) >= 2)
-		{
+		if ($q !== '' && utf8_strlen($q) >= 2) {
 			$users = $this->_getUserModel()->getUsers(
 				array(
-					'username' => array($q , 'r'),
+					'username' => array($q, 'r'),
 					'user_state' => 'valid',
 					'is_banned' => 0
 				),
 				array('limit' => 10)
 			);
-		}
-		else
-		{
+		} else {
 			$users = array();
 		}
 

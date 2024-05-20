@@ -45,10 +45,58 @@ class FS_ChangeMediaImage_ControllerPublic_Media extends XFCP_FS_ChangeMediaImag
         $mediaHelper->assertCanChangeMediaThumbnail($media);
 
         if ($this->isConfirmedPost()) {
-            $changedImage = XenForo_Upload::getUploadedFile('changedImage');
+            $file = XenForo_Upload::getUploadedFile('changedImage');
 
-            if ($changedImage) {
-                $mediaModel->uploadMediaImage($changedImage, $media);
+            if ($file) {
+                // $mediaModel->uploadMediaImage($file, $media);
+
+
+
+
+                $exif = array();
+                // if ($input['upload_type'] == 'image_upload')
+                // {
+                if (function_exists('exif_read_data')) {
+                    $filePath = $file->getTempFile();
+                    $fileType = @getimagesize($filePath);
+
+                    if (isset($fileType[2]) && $fileType[2] == IMAGETYPE_JPEG) {
+                        @ini_set('exif.encode_unicode', 'UTF-8');
+                        $exif = @exif_read_data($filePath, null, true);
+                        if (isset($exif['FILE'])) {
+                            $exif['FILE']['FileName'] = $file->getFileName();
+                        }
+                    }
+                }
+                // }
+
+                // $file->setConstraints($attachmentConstraints);
+                if (!$file->isValid()) {
+                    return $this->responseError($file->getErrors());
+                }
+
+
+                $fileModel = $this->_getFileModel();
+
+                $fileModel->insertMediaUploadedAttachmentData($file, XenForo_Visitor::getUserId(), $media, $exif);
+
+
+                $mediaDw = XenForo_DataWriter::create('XenGallery_DataWriter_Media');
+                $mediaDw->setExistingData($media);
+
+                $time = XenForo_Application::$time;
+
+                $mediaDw->bulkSet(array(
+                    'last_edit_date' => $time,
+                    'thumbnail_date' => $time
+                ));
+
+                $mediaDw->save();
+
+                // $attachmentId = $attachmentModel->insertTemporaryAttachment($dataId, $input['hash']);
+
+                // $message = new XenForo_Phrase('upload_completed_successfully');
+
 
                 // if (XenForo_Visitor::getUserId() != $media['user_id']) {
                 // 	XenForo_Model_Log::logModeratorAction('xengallery_media', $media, 'thumbnail_add');
