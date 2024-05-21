@@ -18,6 +18,17 @@ class FS_ChangeMediaImage_Model_Media extends XFCP_FS_ChangeMediaImage_Model_Med
                 return false;
         }
 
+        public function deletePreviousImages($media)
+        {
+                $originalThumbFile = $this->getMediaThumbnailFilePath($media);
+
+                @unlink($originalThumbFile);
+
+                $changedImageFile = $this->getOriginalDataFilePath($media);
+
+                @unlink($changedImageFile);
+        }
+
         public function uploadMediaImage(XenForo_Upload $upload, array $media)
         {
 

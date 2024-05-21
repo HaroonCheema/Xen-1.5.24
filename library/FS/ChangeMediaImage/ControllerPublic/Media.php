@@ -42,25 +42,14 @@ class FS_ChangeMediaImage_ControllerPublic_Media extends XFCP_FS_ChangeMediaImag
             throw $this->getNoPermissionResponseException();
         }
 
-        $mediaHelper->assertCanChangeMediaThumbnail($media);
-
         if ($this->isConfirmedPost()) {
-
-            $originalThumbFile = $mediaModel->getMediaThumbnailFilePath($media);
-
-            @unlink($originalThumbFile);
-
-            $changedImageFile = $mediaModel->getOriginalDataFilePath($media);
-
-            @unlink($changedImageFile);
 
             $file = XenForo_Upload::getUploadedFile('changedImage');
 
             if ($file) {
                 // $mediaModel->uploadMediaImage($file, $media);
 
-
-
+                // $mediaModel->deletePreviousImages($media);
 
                 $exif = array();
                 // if ($input['upload_type'] == 'image_upload')
@@ -84,6 +73,7 @@ class FS_ChangeMediaImage_ControllerPublic_Media extends XFCP_FS_ChangeMediaImag
                     return $this->responseError($file->getErrors());
                 }
 
+                $mediaModel->deletePreviousImages($media);
 
                 $fileModel = $this->_getFileModel();
 
