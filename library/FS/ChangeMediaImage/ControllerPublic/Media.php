@@ -42,9 +42,13 @@ class FS_ChangeMediaImage_ControllerPublic_Media extends XFCP_FS_ChangeMediaImag
             throw new XenForo_Exception('Missing media record.');
         }
 
-        if (!(($visitor['user_id'] == $media['user_id'] && $visitor->hasPermission('fsChangeMediaImagePer', 'fs_change_own_image')) || $visitor->hasPermission('fsChangeMediaImagePer', 'fs_change_other_image'))) {
+        if (!$mediaModel->canChangeImage($media)) {
             throw $this->getNoPermissionResponseException();
         }
+
+        // if (!(($visitor['user_id'] == $media['user_id'] && $visitor->hasPermission('fsChangeMediaImagePer', 'fs_change_own_image')) || $visitor->hasPermission('fsChangeMediaImagePer', 'fs_change_other_image'))) {
+        //     throw $this->getNoPermissionResponseException();
+        // }
 
         if ($this->isConfirmedPost()) {
 
@@ -129,8 +133,7 @@ class FS_ChangeMediaImage_ControllerPublic_Media extends XFCP_FS_ChangeMediaImag
 
             return $this->responseRedirect(
                 XenForo_ControllerResponse_Redirect::SUCCESS,
-                XenForo_Link::buildPublicLink('xengallery', $media),
-                $message
+                XenForo_Link::buildPublicLink('xengallery', $media)
             );
         } else {
             $viewParams = array(

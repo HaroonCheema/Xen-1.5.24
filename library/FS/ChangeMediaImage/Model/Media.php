@@ -6,11 +6,11 @@ class FS_ChangeMediaImage_Model_Media extends XFCP_FS_ChangeMediaImage_Model_Med
         {
                 $this->standardizeViewingUserReference($viewingUser);
 
-                if ($media['user_id'] == $viewingUser['user_id'] && XenForo_Permission::hasPermission($viewingUser['permissions'], 'fsChangeMediaImagePer', 'fs_change_own_image')) {
+                if (XenForo_Permission::hasPermission($viewingUser['permissions'], 'fsChangeMediaImagePer', 'fs_change_other_image')) {
                         return true;
                 }
 
-                if (XenForo_Permission::hasPermission($viewingUser['permissions'], 'fsChangeMediaImagePer', 'fs_change_other_image')) {
+                if ($media['user_id'] == $viewingUser['user_id'] && XenForo_Permission::hasPermission($viewingUser['permissions'], 'fsChangeMediaImagePer', 'fs_change_own_image')) {
                         return true;
                 }
 
