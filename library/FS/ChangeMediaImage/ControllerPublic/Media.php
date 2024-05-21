@@ -78,7 +78,10 @@ class FS_ChangeMediaImage_ControllerPublic_Media extends XFCP_FS_ChangeMediaImag
 
                 $fileModel = $this->_getFileModel();
 
-                $fileModel->insertMediaUploadedAttachmentData($file, XenForo_Visitor::getUserId(), $media, $exif);
+                $dataId = $fileModel->insertMediaUploadedAttachmentData($file, XenForo_Visitor::getUserId(), $media, $exif);
+                if (!$dataId) {
+                    return $this->responseError(new XenForo_Phrase('uploaded_file_does_not_have_an_allowed_extension'));
+                }
 
 
                 $mediaDw = XenForo_DataWriter::create('XenGallery_DataWriter_Media');
@@ -95,7 +98,7 @@ class FS_ChangeMediaImage_ControllerPublic_Media extends XFCP_FS_ChangeMediaImag
 
                 // $attachmentId = $attachmentModel->insertTemporaryAttachment($dataId, $input['hash']);
 
-                // $message = new XenForo_Phrase('upload_completed_successfully');
+                $message = new XenForo_Phrase('upload_completed_successfully');
 
 
                 // if (XenForo_Visitor::getUserId() != $media['user_id']) {
@@ -105,7 +108,8 @@ class FS_ChangeMediaImage_ControllerPublic_Media extends XFCP_FS_ChangeMediaImag
 
             return $this->responseRedirect(
                 XenForo_ControllerResponse_Redirect::SUCCESS,
-                XenForo_Link::buildPublicLink('xengallery', $media)
+                XenForo_Link::buildPublicLink('xengallery', $media),
+                $message
             );
         } else {
             $viewParams = array(
