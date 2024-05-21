@@ -45,6 +45,15 @@ class FS_ChangeMediaImage_ControllerPublic_Media extends XFCP_FS_ChangeMediaImag
         $mediaHelper->assertCanChangeMediaThumbnail($media);
 
         if ($this->isConfirmedPost()) {
+
+            $originalThumbFile = $mediaModel->getMediaThumbnailFilePath($media);
+
+            @unlink($originalThumbFile);
+
+            $changedImageFile = $mediaModel->getOriginalDataFilePath($media);
+
+            @unlink($changedImageFile);
+
             $file = XenForo_Upload::getUploadedFile('changedImage');
 
             if ($file) {
