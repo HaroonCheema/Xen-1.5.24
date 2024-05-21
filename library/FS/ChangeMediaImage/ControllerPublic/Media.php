@@ -38,6 +38,10 @@ class FS_ChangeMediaImage_ControllerPublic_Media extends XFCP_FS_ChangeMediaImag
         $media = $mediaHelper->assertMediaValidAndViewable($mediaId);
         $media = $mediaModel->prepareMedia($media);
 
+        if (!$media) {
+            throw new XenForo_Exception('Missing media record.');
+        }
+
         if (!(($visitor['user_id'] == $media['user_id'] && $visitor->hasPermission('fsChangeMediaImagePer', 'fs_change_own_image')) || $visitor->hasPermission('fsChangeMediaImagePer', 'fs_change_other_image'))) {
             throw $this->getNoPermissionResponseException();
         }
@@ -46,31 +50,56 @@ class FS_ChangeMediaImage_ControllerPublic_Media extends XFCP_FS_ChangeMediaImag
 
             $file = XenForo_Upload::getUploadedFile('changedImage');
 
-            if ($file) {
-                // $mediaModel->uploadMediaImage($file, $media);
 
-                // $mediaModel->deletePreviousImages($media);
+            if ($file) {
+
+                $attachmentModel = $this->_getAttachmentModel();
+                $attachmentHandler = $attachmentModel->getAttachmentHandler('xengallery_media');
+                $attachmentConstraints = $attachmentHandler->getUploadConstraints($media['media_type']);
+
 
                 $exif = array();
-                // if ($input['upload_type'] == 'image_upload')
-                // {
-                if (function_exists('exif_read_data')) {
-                    $filePath = $file->getTempFile();
-                    $fileType = @getimagesize($filePath);
+                if ($media['media_type'] == 'image_upload') {
+                    if (function_exists('exif_read_data')) {
+                        $filePath = $file->getTempFile();
+                        $fileType = @getimagesize($filePath);
 
-                    if (isset($fileType[2]) && $fileType[2] == IMAGETYPE_JPEG) {
-                        @ini_set('exif.encode_unicode', 'UTF-8');
-                        $exif = @exif_read_data($filePath, null, true);
-                        if (isset($exif['FILE'])) {
-                            $exif['FILE']['FileName'] = $file->getFileName();
+                        if (isset($fileType[2]) && $fileType[2] == IMAGETYPE_JPEG) {
+                            @ini_set('exif.encode_unicode', 'UTF-8');
+                            $exif = @exif_read_data($filePath, null, true);
+                            if (isset($exif['FILE'])) {
+                                $exif['FILE']['FileName'] = $file->getFileName();
+                            }
                         }
                     }
                 }
-                // }
 
-                // $file->setConstraints($attachmentConstraints);
+                $file->setConstraints($attachmentConstraints);
+
+                if (!$file->isImage()) {
+                    throw new XenForo_Exception(new XenForo_Phrase('uploaded_file_is_not_valid_image'), true);
+                };
+
                 if (!$file->isValid()) {
                     return $this->responseError($file->getErrors());
+                }
+
+
+                if ($attachmentConstraints['storage'] > 0) {
+                    $visitor = XenForo_Visitor::getInstance();
+
+                    $newFileSize = filesize($file->getTempFile());
+
+                    if (($visitor['xengallery_media_quota'] + ($newFileSize / 1024)) > ($attachmentConstraints['storage'] / 1024)) {
+                        return $this->responseError(new XenForo_Phrase(
+                            'xengallery_you_have_exceeded_your_allowed_storage_quota',
+                            array(
+                                'quota' => XenForo_Locale::numberFormat($attachmentConstraints['storage'], 'size'),
+                                'filesize' => XenForo_Locale::numberFormat($newFileSize, 'size'),
+                                'storage' => XenForo_Locale::numberFormat($visitor['xengallery_media_quota'] * 1024, 'size')
+                            )
+                        ));
+                    }
                 }
 
                 $mediaModel->deletePreviousImages($media);
@@ -95,14 +124,7 @@ class FS_ChangeMediaImage_ControllerPublic_Media extends XFCP_FS_ChangeMediaImag
 
                 $mediaDw->save();
 
-                // $attachmentId = $attachmentModel->insertTemporaryAttachment($dataId, $input['hash']);
-
                 $message = new XenForo_Phrase('upload_completed_successfully');
-
-
-                // if (XenForo_Visitor::getUserId() != $media['user_id']) {
-                // 	XenForo_Model_Log::logModeratorAction('xengallery_media', $media, 'thumbnail_add');
-                // }
             }
 
             return $this->responseRedirect(
