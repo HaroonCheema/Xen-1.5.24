@@ -4,7 +4,6 @@ class FS_CustomFields_ControllerPublic_Address extends XenForo_ControllerPublic_
 {
 	public function actionIndex()
 	{
-
 		$visitor = XenForo_Visitor::getInstance();
 
 		if (!$visitor->canEditProfile()) {
@@ -32,12 +31,18 @@ class FS_CustomFields_ControllerPublic_Address extends XenForo_ControllerPublic_
 		}
 
 		$customFields = $this->_input->filterSingle('custom_fields', XenForo_Input::ARRAY_SIMPLE);
-		$customFieldCheckbox = $this->_input->filterSingle('is_checked', XenForo_Input::ARRAY_SIMPLE);
+
+		$showAddressSave = $this->_getFieldModel()->prepareUserFields(
+			$this->_getFieldModel()->getUserFields(array('showaddress' => true)),
+			true
+			// array(),
+			// false
+		);
 
 		$customFieldsShown = array_keys($customFields);
 
 		foreach ($customFields as $key => &$value) {
-			if (!isset($customFieldCheckbox[$key])) {
+			if (!isset($showAddressSave[$key])) {
 				$value = "";
 			}
 		}
@@ -53,6 +58,23 @@ class FS_CustomFields_ControllerPublic_Address extends XenForo_ControllerPublic_
 		}
 
 		$writer->save();
+
+		$options = XenForo_Application::getOptions();
+		$db = XenForo_Application::getDb();
+
+		$userId = $visitor['user_id'];
+
+		$saveAddressField = $options->fs_save_address_fields;
+
+
+		if ($saveAddressField) {
+
+			$saveAddressValue = isset($customFields[$saveAddressField]) ? $customFields[$saveAddressField] : "";
+
+			$sql = 'UPDATE xf_user SET fs_save_address = ? WHERE user_id = ?';
+			$db->query($sql, [$saveAddressValue, $userId]);
+		}
+
 
 		return $this->responseRedirect(
 			XenForo_ControllerResponse_Redirect::SUCCESS,
