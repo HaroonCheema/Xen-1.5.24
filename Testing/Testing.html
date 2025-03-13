@@ -1,5 +1,13 @@
 <xen:title>{xen:phrase fs_address}</xen:title>
 
+<style>
+
+.nextStep{
+display: none;
+}
+
+</style>
+
 <form method="post" class="xenForm AutoValidator"
 	action="{xen:link 'address/save'}"
 	data-fieldValidatorUrl="{xen:link register/validate-field}"
@@ -7,8 +15,25 @@
 	>
 
     <xen:if is="!{$customFieldInputName}"><xen:set var="$customFieldInputName" value="custom_fields" /></xen:if>
+
+	<dl class="ctrlUnit">
+		<dt>
+		<label for="ctrl_custom_field_receive_swag">{$customFields.receive_swag.title}:</label>
+		<dfn>{xen:phrase required}</dfn>
+		</dt>
+		<dd>
+			<ul class="checkboxColumns">
+					<li><label><input type="radio" name="{$customFieldInputName}[receive_swag]" value="" {xen:checked 'strval({$customFields.receive_swag.field_value}) == ""'} /> <span class="muted">{xen:phrase no_selection}</span></label></li>
+					<li><label><input type="radio" name="{$customFieldInputName}[receive_swag]" value="yes" {xen:checked 'strval({$customFields.receive_swag.field_value}) == strval("yes")'} /> Yes</label></li>
+					<li><label><input type="radio" name="{$customFieldInputName}[receive_swag]" value="no" {xen:checked 'strval({$customFields.receive_swag.field_value}) == strval("no")'} /> No</label></li>
+
+				</ul>
+			
+		</dd>
+			
+	</dl>
 	
-		<fieldset>
+		<fieldset class="nextStep">
 	
 			<dl class="ctrlUnit">
 				<dt>
@@ -124,25 +149,6 @@
 
             <dl class="ctrlUnit">
 				<dt>
-				<label for="ctrl_custom_field_receive_swag">{$customFields.receive_swag.title}:</label>
-				<xen:if is="{$customFields.receive_swag.required}"><dfn>{xen:phrase required}</dfn></xen:if>
-				</dt>
-				<dd>
-                    <ul class="checkboxColumns">
-                            <xen:if is="!{$customFields.receive_swag.required}">
-                                <li><label><input type="radio" name="{$customFieldInputName}[receive_swag]" value="" {xen:checked 'strval({$customFields.receive_swag.field_value}) == ""'} /> <span class="muted">{xen:phrase no_selection}</span></label></li>
-                            </xen:if>
-                            <xen:foreach loop="$customFields.receive_swag.fieldChoices" key="$choice" value="$text">
-                                <li><label><input type="radio" name="{$customFieldInputName}[receive_swag]" value="{$choice}" {xen:checked 'strval({$customFields.receive_swag.field_value}) == strval({$choice})'} /> {xen:raw $text}</label></li>
-                            </xen:foreach>
-                            </ul>
-                    
-				</dd>
-			        
-			</dl>
-
-            <dl class="ctrlUnit">
-				<dt>
 				<label for="ctrl_custom_field_t_shirt_size">{$customFields.t_shirt_size.title}:</label>
 				<xen:if is="{$customFields.t_shirt_size.required}"><dfn>{xen:phrase required}</dfn></xen:if>
 				</dt>
@@ -190,3 +196,24 @@
 
 	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
 </form>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        function toggleNextStep() {
+            var selectedValue = document.querySelector('input[name="{$customFieldInputName}[receive_swag]"]:checked');
+            var nextStep = document.querySelector(".nextStep");
+
+            if (selectedValue && selectedValue.value === "yes") {
+                nextStep.style.display = "block"; 
+            } else {
+                nextStep.style.display = "none";
+            }
+        }
+
+        toggleNextStep();
+
+        document.querySelectorAll('input[name="{$customFieldInputName}[receive_swag]"]').forEach(function (radio) {
+            radio.addEventListener("change", toggleNextStep);
+        });
+    });
+</script>

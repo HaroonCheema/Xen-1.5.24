@@ -39,11 +39,27 @@ class FS_CustomFields_ControllerPublic_Address extends XenForo_ControllerPublic_
 			// false
 		);
 
+		if (empty($customFields['receive_swag'])) {
+			return $this->responseError(new XenForo_Phrase('please_enter_value_for_required_field_x', array('field' => $showAddressSave['receive_swag']['title'])));
+		}
+
 		$customFieldsShown = array_keys($customFields);
+		$showAddressSaveKeys = array_keys($showAddressSave);
 
 		foreach ($customFields as $key => &$value) {
 			if (!isset($showAddressSave[$key])) {
 				$value = "";
+			}
+		}
+
+		if (strtolower($customFields['receive_swag']) != "no") {
+			foreach ($showAddressSaveKeys as $key) {
+
+				if (empty($customFields[$key])) {
+					// return $this->responseError(new XenForo_Phrase('please_enter_value_for_required_field_x', array('field' => $showAddressSave[$key]['title'])));
+
+					return $this->responseError(new XenForo_Phrase('fs_enter_complete_all_fields'));
+				}
 			}
 		}
 
@@ -78,7 +94,7 @@ class FS_CustomFields_ControllerPublic_Address extends XenForo_ControllerPublic_
 
 		return $this->responseRedirect(
 			XenForo_ControllerResponse_Redirect::SUCCESS,
-			XenForo_Link::buildPublicLink('address/'),
+			XenForo_Link::buildPublicLink('index'),
 			null
 		);
 	}
