@@ -13,6 +13,12 @@
 			</xen:checkboxunit>
 $0]]></replace>
     </modification>
+    <modification template="user_upgrade_list" modification_key="fs_custom_address_users_exports" description="Exports all active and expired users" execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[/<a href="{xen:adminlink user-upgrades\/add}".*?<\/a>/is]]></find>
+      <replace><![CDATA[<a href="{xen:adminlink user-upgrades/export}" class="button">{xen:phrase fs_export_active_expired_users}</a>
+
+$0]]></replace>
+    </modification>
   </admin_template_modifications>
   <code_events/>
   <code_event_listeners>
@@ -24,6 +30,12 @@ $0]]></replace>
   <email_template_modifications/>
   <optiongroups>
     <group group_id="fs_custom_address_fields" display_order="1" debug_only="0"/>
+    <option option_id="fs_address_csv_file_name" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>active_user_upgrade</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="fs_custom_address_fields" display_order="3"/>
+    </option>
     <option option_id="fs_address_upgrade_ids" edit_format="textbox" data_type="string" can_backup="1">
       <default_value></default_value>
       <edit_format_params></edit_format_params>
@@ -46,7 +58,10 @@ $0]]></replace>
     <phrase title="fs_address" version_id="1" version_string="1"><![CDATA[Address]]></phrase>
     <phrase title="fs_custom_address_fields" version_id="1" version_string="1"><![CDATA[Address]]></phrase>
     <phrase title="fs_enter_complete_all_fields" version_id="1" version_string="1000010"><![CDATA[Please enter a value for all fields.]]></phrase>
+    <phrase title="fs_export_active_expired_users" version_id="1" version_string="1000010"><![CDATA[Export]]></phrase>
     <phrase title="fs_save_address_field" version_id="1" version_string="1"><![CDATA[Save this field]]></phrase>
+    <phrase title="option_fs_address_csv_file_name" version_id="1" version_string="1000010"><![CDATA[Export file name]]></phrase>
+    <phrase title="option_fs_address_csv_file_name_explain" version_id="1" version_string="1000010"><![CDATA[Active and expired user upgrade export csv file name]]></phrase>
     <phrase title="option_fs_address_upgrade_ids" version_id="1" version_string="1"><![CDATA[User Upgrades Ids]]></phrase>
     <phrase title="option_fs_address_upgrade_ids_explain" version_id="1" version_string="1"><![CDATA[Enter user upgrade ids here like 1,2,3,4,...]]></phrase>
     <phrase title="option_fs_save_address_fields" version_id="1" version_string="1"><![CDATA[Applicable Custom Field Id]]></phrase>

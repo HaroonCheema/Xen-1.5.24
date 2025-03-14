@@ -9,6 +9,10 @@ class FS_CustomFields_Listener
             $extend[] = "FS_CustomFields_ControllerAdmin_UserField";
         }
 
+        if ($class == "XenForo_ControllerAdmin_UserUpgrade") {
+            $extend[] = "FS_CustomFields_ControllerAdmin_UserUpgrade";
+        }
+
         if ($class == "XenForo_Model_UserField") {
             $extend[] = "FS_CustomFields_Model_UserField";
         }
