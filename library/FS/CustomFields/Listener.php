@@ -17,6 +17,9 @@ class FS_CustomFields_Listener
             $extend[] = "FS_CustomFields_Model_UserField";
         }
 
+        if ($class == "XenForo_Model_UserUpgrade") {
+            $extend[] = "FS_CustomFields_Model_UserUpgrade";
+        }
 
         if ($class == "XenForo_DataWriter_UserField") {
             $extend[] = "FS_CustomFields_DataWriter_UserField";

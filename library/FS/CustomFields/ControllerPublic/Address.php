@@ -10,6 +10,36 @@ class FS_CustomFields_ControllerPublic_Address extends XenForo_ControllerPublic_
 			return $this->responseNoPermission();
 		}
 
+		$userId = $visitor['user_id'];
+
+		$options = XenForo_Application::getOptions();
+
+		$userUpgradeIds = $options->fs_address_upgrade_ids;
+
+		if (empty($userUpgradeIds)) {
+			return;
+		}
+
+		$db = XenForo_Application::getDb();
+
+		$upgradeIds = array_filter(array_map('trim', explode(',', $userUpgradeIds)));
+
+		$upgradeIdsList = implode(',', array_map('intval', $upgradeIds)); // Convert array to a safe string
+
+		$active = $db->fetchRow("
+    SELECT user_upgrade_active.*,
+           user.*
+    FROM xf_user_upgrade_active AS user_upgrade_active
+    INNER JOIN xf_user AS user ON
+        (user.user_id = user_upgrade_active.user_id)
+    WHERE user_upgrade_active.user_id = ?
+        AND user_upgrade_active.user_upgrade_id IN ($upgradeIdsList)
+", $userId);
+
+		if (!$active) {
+			return $this->responseNoPermission();
+		}
+
 		$customFields = $this->_getFieldModel()->getUserFields(
 			array(),
 			array('valueUserId' => $visitor['user_id'])
@@ -39,8 +69,15 @@ class FS_CustomFields_ControllerPublic_Address extends XenForo_ControllerPublic_
 			// false
 		);
 
-		if (empty($customFields['receive_swag'])) {
-			return $this->responseError(new XenForo_Phrase('please_enter_value_for_required_field_x', array('field' => $showAddressSave['receive_swag']['title'])));
+		$options = XenForo_Application::getOptions();
+		$saveAddressField = $options->fs_save_address_fields;
+
+		if (empty($saveAddressField)) {
+			return $this->responseNoPermission();
+		}
+
+		if (empty($customFields[$saveAddressField])) {
+			return $this->responseError(new XenForo_Phrase('please_enter_value_for_required_field_x', array('field' => $showAddressSave[$saveAddressField]['title'])));
 		}
 
 		$customFieldsShown = array_keys($customFields);
@@ -52,14 +89,11 @@ class FS_CustomFields_ControllerPublic_Address extends XenForo_ControllerPublic_
 			}
 		}
 
-		if (strtolower($customFields['receive_swag']) != "no") {
-			foreach ($showAddressSaveKeys as $key) {
+		foreach ($showAddressSaveKeys as $key) {
 
-				if (empty($customFields[$key])) {
-					// return $this->responseError(new XenForo_Phrase('please_enter_value_for_required_field_x', array('field' => $showAddressSave[$key]['title'])));
+			if (empty($customFields[$key])) {
 
-					return $this->responseError(new XenForo_Phrase('fs_enter_complete_all_fields'));
-				}
+				return $this->responseError(new XenForo_Phrase('fs_enter_complete_all_fields'));
 			}
 		}
 
@@ -75,13 +109,9 @@ class FS_CustomFields_ControllerPublic_Address extends XenForo_ControllerPublic_
 
 		$writer->save();
 
-		$options = XenForo_Application::getOptions();
 		$db = XenForo_Application::getDb();
 
 		$userId = $visitor['user_id'];
-
-		$saveAddressField = $options->fs_save_address_fields;
-
 
 		if ($saveAddressField) {
 
@@ -91,6 +121,112 @@ class FS_CustomFields_ControllerPublic_Address extends XenForo_ControllerPublic_
 			$db->query($sql, [$saveAddressValue, $userId]);
 		}
 
+		$apiKey = $options->fs_amplifier_api_key;
+
+		$isAplicable = isset($customFields[$saveAddressField]) ? strtolower($customFields[$saveAddressField]) : "";
+
+		if ($visitor['upgrade_after_addon'] == 1 && $visitor['amplify_order_submitted'] == 0 && $apiKey && $isAplicable == "yes") {
+
+			$orderSource = $options->fs_amplifier_order_source;
+
+			$encodedApiKey = base64_encode($apiKey);
+
+			$customFields = $this->getModelFromCache('XenForo_Model_UserField')->getUserFields(
+				array(),
+				array('valueUserId' => $userId)
+			);
+
+			$visitorCustomFields = $this->getModelFromCache('XenForo_Model_UserField')->prepareUserFields($customFields, true);
+
+			$time = time();
+
+			$date = new DateTime("@$time");
+			$date->setTimezone(new DateTimeZone('America/Chicago'));
+
+			$formatted = $date->format('Y-m-d\TH:i:s');
+
+			$skuItemSize = [
+				"ADVR24S00" => "Extra Small",
+				"ADVR24S01" => "Small",
+				"ADVR24S02" => "Medium",
+				"ADVR24S03" => "Large",
+				"ADVR24S04" => "Extra Large",
+				"ADVR24S05" => "Extra Extra Large",
+				"ADVR24S06" => "Extra Extra Extra Large",
+				"ADVR24S07" => "Extra Extra Extra Extra Large",
+			];
+
+			$orderData = [
+				"order_source_code" => $orderSource,
+				"order_id" => "order-" . time(),
+				"order_date" => $formatted,
+				"shipping_method" => "Standard Shipping",
+				"billing_info" => [
+					"name" => $visitorCustomFields['shipping_name']['field_value'],
+					'company_name' => 'Amplifier',
+					"address1" => $visitorCustomFields['shipping_street_address']['field_value'],
+					"address2" => isset($visitorCustomFields['shipping_street_address_2']['field_value']) ? $visitorCustomFields['shipping_street_address_2']['field_value'] : "",
+					"city" => $visitorCustomFields['shipping_city']['field_value'],
+					"state" => $visitorCustomFields['shipping_state']['field_value'],
+					"postal_code" => $visitorCustomFields['shipping_postal']['field_value'],
+					"country_code" => $visitorCustomFields['shipping_country']['field_value']
+				],
+				"shipping_info" => [
+					"name" => $visitorCustomFields['shipping_name']['field_value'],
+					'company_name' => 'Amplifier',
+					"address1" => $visitorCustomFields['shipping_street_address']['field_value'],
+					"address2" => isset($visitorCustomFields['shipping_street_address_2']['field_value']) ? $visitorCustomFields['shipping_street_address_2']['field_value'] : "",
+					"city" => $visitorCustomFields['shipping_city']['field_value'],
+					"state" => $visitorCustomFields['shipping_state']['field_value'],
+					"postal_code" => $visitorCustomFields['shipping_postal']['field_value'],
+					"country_code" => $visitorCustomFields['shipping_country']['field_value']
+				],
+				"line_items" => [
+					[
+						"sku" => $visitorCustomFields['t_shirt_size']['field_value'],
+						"description" => "T-shirt - " . isset($skuItemSize[$visitorCustomFields['t_shirt_size']['field_value']]) ? $skuItemSize[$visitorCustomFields['t_shirt_size']['field_value']] : "",
+						"quantity" => 1
+					]
+				]
+			];
+
+			try {
+				$ch = curl_init('https://api.amplifier.com/orders');
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+				curl_setopt($ch, CURLOPT_POST, true);
+
+				curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($orderData));
+
+				curl_setopt($ch, CURLOPT_HTTPHEADER, [
+					'Authorization: Basic ' . $encodedApiKey,
+					'Content-Type: application/json'
+				]);
+
+				$response = curl_exec($ch);
+				$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+				if (curl_errno($ch)) {
+					throw new Exception('cURL error: ' . curl_error($ch));
+				}
+
+				$decodedResponse = json_decode($response, true);
+
+				if ($httpCode == 200) {
+					if (isset($decodedResponse['id'])) {
+						$amplifierOrderId = $decodedResponse['id'];
+
+						$sql = 'UPDATE xf_user SET amplify_order_submitted = ?, amplifier_order_id = ? WHERE user_id = ?';
+						$db->query($sql, [1, $amplifierOrderId, $userId]);
+					}
+				} else {
+					throw new Exception("Amplifier API error (HTTP $httpCode): " . $response);
+				}
+
+				curl_close($ch);
+			} catch (Exception $e) {
+				echo "Exception caught: " . $e->getMessage();
+			}
+		}
 
 		return $this->responseRedirect(
 			XenForo_ControllerResponse_Redirect::SUCCESS,

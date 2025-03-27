@@ -12,8 +12,15 @@ class FS_CustomFields_Installer
         self::$_init = [
             "addField" => "ALTER TABLE `xf_user_field` ADD `show_address`  INT  DEFAULT 0",
             'saveAddressUser' => "ALTER TABLE `xf_user` ADD `fs_save_address` VARCHAR(10) NOT NULL DEFAULT ''",
+            "upgradeAfterAddon" => "ALTER TABLE `xf_user` ADD `upgrade_after_addon`  INT  DEFAULT 0",
+            "amplifyOrderSubmitted" => "ALTER TABLE `xf_user` ADD `amplify_order_submitted`  INT  DEFAULT 0",
+            'amplifierOrderId' => "ALTER TABLE `xf_user` ADD `amplifier_order_id` VARCHAR(150) NOT NULL DEFAULT ''",
+
             'dropField' => "ALTER TABLE `xf_user_field` DROP `show_address`;",
             'dropFieldUser' => "ALTER TABLE `xf_user` DROP `fs_save_address`;",
+            'dropUpgradeAfterAddon' => "ALTER TABLE `xf_user` DROP `upgrade_after_addon`;",
+            'dropAmplifyOrderSubmitted' => "ALTER TABLE `xf_user` DROP `amplify_order_submitted`;",
+            'dropAmplifierOrderId' => "ALTER TABLE `xf_user` DROP `amplifier_order_id`;",
         ];
     }
 
@@ -23,6 +30,9 @@ class FS_CustomFields_Installer
         $db = XenForo_Application::get('db');
         $db->query(self::$_init['addField']);
         $db->query(self::$_init['saveAddressUser']);
+        $db->query(self::$_init['upgradeAfterAddon']);
+        $db->query(self::$_init['amplifyOrderSubmitted']);
+        $db->query(self::$_init['amplifierOrderId']);
     }
 
     public static function uninstall()
@@ -33,6 +43,9 @@ class FS_CustomFields_Installer
         self::init();
         $db->query(self::$_init['dropField']);
         $db->query(self::$_init['dropFieldUser']);
+        $db->query(self::$_init['dropUpgradeAfterAddon']);
+        $db->query(self::$_init['dropAmplifyOrderSubmitted']);
+        $db->query(self::$_init['dropAmplifierOrderId']);
     }
 
     protected static function _executeQuery($sql, array $bind = array())
