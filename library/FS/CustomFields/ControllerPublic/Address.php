@@ -79,9 +79,20 @@ class FS_CustomFields_ControllerPublic_Address extends XenForo_ControllerPublic_
 		if (empty($customFields[$saveAddressField])) {
 			return $this->responseError(new XenForo_Phrase('please_enter_value_for_required_field_x', array('field' => $showAddressSave[$saveAddressField]['title'])));
 		}
+			$showAddressSaveKeys = array_keys($showAddressSave);
+		if($customFields[$saveAddressField]==$options->fs_receive_swag_no)
+		{
+		    $customFieldsnew=[$options->fs_save_address_fields=>$options->fs_receive_swag_no];
+		    $customFields=$customFieldsnew;
+		    $showAddressSaveKeys=[];
+		    $showAddressSaveKeys[]=$options->fs_save_address_fields;
+		   
+		    //array_intersect($good, $post)
+		}
+	//	var_dump($customFields,$showAddressSaveKeys);
 
 		$customFieldsShown = array_keys($customFields);
-		$showAddressSaveKeys = array_keys($showAddressSave);
+	
 
 		foreach ($customFields as $key => &$value) {
 			if (!isset($showAddressSave[$key])) {
@@ -99,7 +110,8 @@ class FS_CustomFields_ControllerPublic_Address extends XenForo_ControllerPublic_
 
 		$writer = XenForo_DataWriter::create('XenForo_DataWriter_User');
 		$writer->setExistingData(XenForo_Visitor::getUserId());
-		$writer->setCustomFields($customFields, $customFieldsShown);
+
+		$writer->setAddressCustomFields($customFields, $customFieldsShown);
 
 		$writer->preSave();
 
@@ -108,7 +120,7 @@ class FS_CustomFields_ControllerPublic_Address extends XenForo_ControllerPublic_
 		}
 
 		$writer->save();
-
+//exit;
 		$db = XenForo_Application::getDb();
 
 		$userId = $visitor['user_id'];
@@ -186,7 +198,13 @@ class FS_CustomFields_ControllerPublic_Address extends XenForo_ControllerPublic_
 						"sku" => $visitorCustomFields['t_shirt_size']['field_value'],
 						"description" => "T-shirt - " . isset($skuItemSize[$visitorCustomFields['t_shirt_size']['field_value']]) ? $skuItemSize[$visitorCustomFields['t_shirt_size']['field_value']] : "",
 						"quantity" => 1
+					],
+					[
+						"sku" => $options->fs_additions_sku,
+						"description" => $options->fs_additions_sku_des,
+						"quantity" => 1
 					]
+					
 				]
 			];
 

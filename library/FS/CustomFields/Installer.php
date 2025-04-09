@@ -1,13 +1,11 @@
 <?php
 
-class FS_CustomFields_Installer
-{
+class FS_CustomFields_Installer {
 
     protected static $_db;
     private static $_init;
 
-    private static function init()
-    {
+    private static function init() {
 
         self::$_init = [
             "addField" => "ALTER TABLE `xf_user_field` ADD `show_address`  INT  DEFAULT 0",
@@ -15,7 +13,6 @@ class FS_CustomFields_Installer
             "upgradeAfterAddon" => "ALTER TABLE `xf_user` ADD `upgrade_after_addon`  INT  DEFAULT 0",
             "amplifyOrderSubmitted" => "ALTER TABLE `xf_user` ADD `amplify_order_submitted`  INT  DEFAULT 0",
             'amplifierOrderId' => "ALTER TABLE `xf_user` ADD `amplifier_order_id` VARCHAR(150) NOT NULL DEFAULT ''",
-
             'dropField' => "ALTER TABLE `xf_user_field` DROP `show_address`;",
             'dropFieldUser' => "ALTER TABLE `xf_user` DROP `fs_save_address`;",
             'dropUpgradeAfterAddon' => "ALTER TABLE `xf_user` DROP `upgrade_after_addon`;",
@@ -24,19 +21,20 @@ class FS_CustomFields_Installer
         ];
     }
 
-    public static function install()
-    {
-        self::init();
-        $db = XenForo_Application::get('db');
-        $db->query(self::$_init['addField']);
-        $db->query(self::$_init['saveAddressUser']);
-        $db->query(self::$_init['upgradeAfterAddon']);
-        $db->query(self::$_init['amplifyOrderSubmitted']);
-        $db->query(self::$_init['amplifierOrderId']);
+    public static function install($installedAddon) {
+        $installedVersion = is_array($installedAddon) ? $installedAddon['version_id'] : 0;
+        if ($installedVersion <= 1) { //New Install
+            self::init();
+            $db = XenForo_Application::get('db');
+            $db->query(self::$_init['addField']);
+            $db->query(self::$_init['saveAddressUser']);
+            $db->query(self::$_init['upgradeAfterAddon']);
+            $db->query(self::$_init['amplifyOrderSubmitted']);
+            $db->query(self::$_init['amplifierOrderId']);
+        }
     }
 
-    public static function uninstall()
-    {
+    public static function uninstall() {
 
         $db = XenForo_Application::get('db');
 
@@ -48,8 +46,7 @@ class FS_CustomFields_Installer
         $db->query(self::$_init['dropAmplifierOrderId']);
     }
 
-    protected static function _executeQuery($sql, array $bind = array())
-    {
+    protected static function _executeQuery($sql, array $bind = array()) {
         try {
             return self::_getDb()->query($sql, $bind);
         } catch (Zend_Db_Exception $e) {
@@ -60,8 +57,7 @@ class FS_CustomFields_Installer
     /**
      * @return Zend_Db_Adapter_Abstract
      */
-    protected static function _getDb()
-    {
+    protected static function _getDb() {
         if (!self::$_db) {
             self::$_db = XenForo_Application::getDb();
         }

@@ -17,3 +17,7 @@ $config['designer']['enabled'] = true;
 $config['fullUnicode'] = true;
 
 $config['development']['defaultAddOn'] = 'FS/CustomFields';
+
+
+// username : admin
+// password : *admin123#
