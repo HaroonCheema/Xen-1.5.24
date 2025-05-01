@@ -8,8 +8,8 @@ class FS_CustomFields_ControllerAdmin_UserUpgrade extends XFCP_FS_CustomFields_C
 
         $options = XenForo_Application::getOptions();
 
-        $activeUpgradeUsers = $this->_getUpgradeRecordsListParams(true);
-        $expiredUpgradeUsers = $this->_getUpgradeRecordsListParams(false);
+        $activeUpgradeUsers = $this->_getUpgradeRecordsListParamsExport(true);
+        $expiredUpgradeUsers = $this->_getUpgradeRecordsListParamsExport(false);
 
         $saveAddressField = $options->fs_save_address_fields;
 
@@ -112,5 +112,37 @@ class FS_CustomFields_ControllerAdmin_UserUpgrade extends XFCP_FS_CustomFields_C
         fclose($output);
 
         exit;
+    }
+
+    protected function _getUpgradeRecordsListParamsExport($active)
+    {
+        $userUpgradeModel = $this->_getUserUpgradeModel();
+
+        $page = $this->_input->filterSingle('page', XenForo_Input::UINT);
+        $perPage = 20000;
+        $pageNavParams = array();
+
+        $fetchOptions = array(
+            'page' => $page,
+            'perPage' => $perPage,
+            'join' => XenForo_Model_UserUpgrade::JOIN_UPGRADE,
+        );
+
+        $orderBy = $this->_input->filterSingle('order', XenForo_Input::STRING);
+        $orderDirection = $this->_input->filterSingle('direction', XenForo_Input::STRING);
+        if ($orderBy) {
+            $fetchOptions['order'] = $orderBy;
+            $fetchOptions['direction'] = $orderDirection;
+            $pageNavParams['order'] = $orderBy;
+            $pageNavParams['direction'] = $orderDirection;
+        }
+
+        $conditions = array(
+            'active' => $active
+        );
+
+        return array(
+            'upgradeRecords' => $userUpgradeModel->getUserUpgradeRecordsExport($conditions, $fetchOptions),
+        );
     }
 }

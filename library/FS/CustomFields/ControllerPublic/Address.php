@@ -79,20 +79,16 @@ class FS_CustomFields_ControllerPublic_Address extends XenForo_ControllerPublic_
 		if (empty($customFields[$saveAddressField])) {
 			return $this->responseError(new XenForo_Phrase('please_enter_value_for_required_field_x', array('field' => $showAddressSave[$saveAddressField]['title'])));
 		}
-			$showAddressSaveKeys = array_keys($showAddressSave);
-		if($customFields[$saveAddressField]==$options->fs_receive_swag_no)
-		{
-		    $customFieldsnew=[$options->fs_save_address_fields=>$options->fs_receive_swag_no];
-		    $customFields=$customFieldsnew;
-		    $showAddressSaveKeys=[];
-		    $showAddressSaveKeys[]=$options->fs_save_address_fields;
-		   
-		    //array_intersect($good, $post)
+		$showAddressSaveKeys = array_keys($showAddressSave);
+		if ($customFields[$saveAddressField] == $options->fs_receive_swag_no) {
+			$customFieldsnew = [$options->fs_save_address_fields => $options->fs_receive_swag_no];
+			$customFields = $customFieldsnew;
+			$showAddressSaveKeys = [];
+			$showAddressSaveKeys[] = $options->fs_save_address_fields;
 		}
-	//	var_dump($customFields,$showAddressSaveKeys);
 
 		$customFieldsShown = array_keys($customFields);
-	
+
 
 		foreach ($customFields as $key => &$value) {
 			if (!isset($showAddressSave[$key])) {
@@ -101,9 +97,11 @@ class FS_CustomFields_ControllerPublic_Address extends XenForo_ControllerPublic_
 		}
 
 		foreach ($showAddressSaveKeys as $key) {
+			if ($key == "shipping_street_address_2") {
+				continue;
+			}
 
 			if (empty($customFields[$key])) {
-
 				return $this->responseError(new XenForo_Phrase('fs_enter_complete_all_fields'));
 			}
 		}
@@ -120,7 +118,6 @@ class FS_CustomFields_ControllerPublic_Address extends XenForo_ControllerPublic_
 		}
 
 		$writer->save();
-//exit;
 		$db = XenForo_Application::getDb();
 
 		$userId = $visitor['user_id'];
@@ -204,7 +201,7 @@ class FS_CustomFields_ControllerPublic_Address extends XenForo_ControllerPublic_
 						"description" => $options->fs_additions_sku_des,
 						"quantity" => 1
 					]
-					
+
 				]
 			];
 
