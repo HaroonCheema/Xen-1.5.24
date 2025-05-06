@@ -220,6 +220,12 @@ class FS_CustomFields_ControllerPublic_Address extends XenForo_ControllerPublic_
 				$response = curl_exec($ch);
 				$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
+				if ($httpCode == 500) {
+					$errorText = "Amplifier API Internal Server Error";
+
+					throw new Exception($errorText);
+				}
+
 				if (curl_errno($ch)) {
 					throw new Exception('cURL error: ' . curl_error($ch));
 				}
@@ -234,12 +240,48 @@ class FS_CustomFields_ControllerPublic_Address extends XenForo_ControllerPublic_
 						$db->query($sql, [1, $amplifierOrderId, $userId]);
 					}
 				} else {
-					throw new Exception("Amplifier API error (HTTP $httpCode): " . $response);
+					if (isset($decodedResponse['errors']) && is_array($decodedResponse['errors'])) {
+						$error = [];
+						foreach ($decodedResponse['errors'] as $err) {
+							// $key = $err['name'] ?? 'general';
+							$message = $err['message'] ?? 'Unknown error';
+							$error[] = htmlspecialchars($message, ENT_QUOTES, 'UTF-8', false);
+						}
+
+						$message = $error;
+
+						foreach ($message as &$m) {
+							if (is_string($m)) {
+								$m = htmlspecialchars($m, ENT_QUOTES, 'UTF-8', false);
+							}
+						}
+
+						$controllerResponse = new XenForo_ControllerResponse_Error();
+						$controllerResponse->errorText = $message;
+
+						return $controllerResponse;
+					} elseif (isset($decodedResponse['message'])) {
+						$errorText = $decodedResponse['message'];
+					} else {
+						$errorText = 'Unknown error occurred.';
+					}
+
+					throw new Exception($errorText);
 				}
 
 				curl_close($ch);
 			} catch (Exception $e) {
-				echo "Exception caught: " . $e->getMessage();
+
+				$message = $e->getMessage();
+
+				$message = htmlspecialchars($message, ENT_QUOTES, 'UTF-8', false);
+
+				$controllerResponse = new XenForo_ControllerResponse_Error();
+				$controllerResponse->errorText = $message;
+
+				return $controllerResponse;
+
+				// echo "Exception caught: " . $e->getMessage();
 			}
 		}
 
