@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<block block_id="Waindigo_NewSocialForums" title="New Social Forums by Waindigo" version_string="1.0.1" version_id="0" url="http://www.waindigo.com/" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="" cache="+10 minutes">
+  <admin_templates/>
+  <listeners/>
+  <options/>
+  <phrases/>
+  <route_prefixes/>
+  <templates>
+    <template title="EWRblock_Waindigo_NewSocialForums"><![CDATA[<xen:require css="EWRblock_Waindigo_NewSocialForums.css" />
+<div class="section newSocialForumsBlock">
+	<div class="secondaryContent">
+		<h3>{xen:phrase waindigo_recent_social_forums_socialgroups}</h3>
+		<ol class="nodeList" id="forums">
+			<xen:if is="{$Waindigo_NewSocialForums.socialForums}">
+			<xen:foreach loop="{$Waindigo_NewSocialForums.socialForums}" value="$forum">
+
+<li>
+	<a href="{xen:link 'social-forums', {$forum}}" class="avatar NoOverlay Avsg-{$forum.social_forum_id}m" data-avatarhtml="true"><img src="{$forum.urls.s}" width="36" height="36" alt="{$forum.title}"></a>
+
+	<div class="socialForum">
+		<h4><a href="{xen:link social-forums, $forum}">{$forum.title}</a></h4>
+
+		<div class="nodeStats pairsInline">
+		<dl>
+			<dt>{xen:phrase discussions}:</dt> <dd>{xen:if $forum.privateInfo, '&ndash;', {xen:number $forum.discussion_count}}</dd>
+			<dt>{xen:phrase messages}:</dt> <dd>{xen:if $forum.privateInfo, '&ndash;', {xen:number $forum.message_count}}</dd>
+		</dl>
+		</div>
+	</div>
+</li>
+				</xen:foreach>
+			<xen:else />
+				{xen:phrase waindigo_not_member_of_any_social_forums_socialgroups}
+			</xen:if>
+		</ol>
+	</div>
+</div>]]></template>
+    <template title="EWRblock_Waindigo_NewSocialForums.css"><![CDATA[.newSocialForumsBlock ol li
+{
+	clear:both;
+	min-height: 50px;
+}
+
+.newSocialForumsBlock .socialForum
+{
+	margin: 0 0 0 45px;
+	padding: 4px;
+}
+
+.newSocialForumsBlock ol li a.avatar
+{
+	float:left;
+	padding: 0 0 5px 0;
+}
+
+.newSocialForumsBlock .socialForum h4
+{
+	font-size: 15px;
+}
+]]></template>
+  </templates>
+</block>
